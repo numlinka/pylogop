@@ -35,7 +35,7 @@ import logop
 log = logop.Logging(stdout=False)
 
 # 初始化一个带控制台着色的标准输出对象
-stdob = log.Logop_standard_up()
+stdob = logop.Logop_standard_up()
 
 # 将输出对象添加到日志对象中
 log.add_op(stdob)
@@ -55,7 +55,7 @@ import logop
 log = logop.Logging()
 
 # 初始化一个日志文件输出对象
-fileob = logop.Logop_file(pathdir='', pathname='$(.date).log')
+fileob = logop.Logop_file(pathdir='.', pathname='$(.date).log')
 
 log.add_op(fileob)
 
