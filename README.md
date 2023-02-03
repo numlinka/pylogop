@@ -242,7 +242,7 @@ logop.Logoutput(name: str = ...)
 
 
 
-## Logop_standard (标准)标准输出对象
+## Logop_standard (标准)输出对象
 
 ```Python
 logop.Logop_standard()
