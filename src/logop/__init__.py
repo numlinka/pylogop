@@ -4,9 +4,6 @@
 # *Author:      numLinka
 
 
-__version__ = "0.2.0"
-
-
 import os
 import sys
 import inspect
@@ -16,6 +13,8 @@ import multiprocessing
 
 from typing import Union
 
+
+__version__ = "0.3.0"
 
 
 ALL      = - 0x80
@@ -49,7 +48,6 @@ variable_table = """ $(variable)
 """
 
 
-
 class FORMAT(object):
     # 朴素
     SIMPLE = '[$(.levelname)] $(.message)'
@@ -59,9 +57,6 @@ class FORMAT(object):
 
     # 调试
     DEBUG = '[$(.date) $(.time).$(.moment)] $(.file) [$(.thread)/$(.levelname)] [line:$(.line)] $(.message)'
-
-
-
 
 
 def op_character_variable(op_format: str, table: dict) -> str:
@@ -76,8 +71,6 @@ def op_character_variable(op_format: str, table: dict) -> str:
         op = op.replace(f'$(.{key})', f'{value}')
 
     return op
-
-
 
 
 
@@ -98,8 +91,6 @@ class Logoutput(object):
 
     def add_exception_count(self) -> None:
         self.op_exception_count += 1
-
-
 
 
 
@@ -125,8 +116,6 @@ class Logop_standard(Logoutput):
         else:
             sys.stderr.write(ops)
             sys.stdout.flush()
-
-
 
 
 
@@ -162,8 +151,6 @@ class Logop_standard_up(Logoutput):
         else:
             sys.stderr.write(ops)
             sys.stdout.flush()
-
-
 
 
 
@@ -213,15 +200,14 @@ class Logop_file(Logoutput):
 
 
 
-
-
 class Logging(object):
     __level = INFO
     __op_format = FORMAT.DEFAULT
     __op_list = []
 
 
-    def __init__(self, level: int = INFO, op_format: str = FORMAT.DEFAULT, *, stdout: bool = True):
+    def __init__(self, level: int = INFO, op_format: str = FORMAT.DEFAULT,
+                 *, stdout: bool = True, asynchronous: bool = False, threadname: str = 'LoggingThread'):
         self.__call_lock = threading.RLock()
         self.__set_lock = threading.RLock()
 
@@ -230,6 +216,13 @@ class Logging(object):
 
         if stdout: self.add_op(Logop_standard())
 
+        self.__asynchronous = True if asynchronous else False
+
+        if self.__asynchronous:
+            self.__call_event = threading.Event()
+            self.__message_list = []
+            self.__asynchronous_task = threading.Thread(None,self.__run_cycle, threadname, (), {}, daemon=True)
+            self.__asynchronous_task.start()
 
 
     def setlevel(self, level: int) -> None:
@@ -252,7 +245,6 @@ class Logging(object):
                 raise ValueError('$(.message) must be included in format')
 
             self.__op_format = op_format
-
 
     #! fallibility
     def add_op(self, target: Logoutput) -> None:
@@ -279,7 +271,6 @@ class Logging(object):
 
             self.__op_list.append(target)
 
-
     #! fallibility
     def del_op(self, ident: int) -> None:
         with self.__set_lock:
@@ -290,8 +281,6 @@ class Logging(object):
                 raise ValueError('The ident value does not exist')
 
             del self.__op_list[index]
-
-
 
     #! fallibility
     def get_op_list(self) -> list:
@@ -312,39 +301,35 @@ class Logging(object):
             count = len(self.__op_list)
             return count
 
-
     #! fallibility
     def get_op_object(self, ident: int) -> Union[Logoutput, None]:
         with self.__set_lock:
-            for opob in self.__op_list:
-                if opob.op_ident == ident:
-                    return opob
+            for opobj in self.__op_list:
+                if opobj.op_ident == ident:
+                    return opobj
 
             else:
                 return None
-
 
     #! fallibility
     def get_stdop_object(self) -> Union[Logoutput, None]:
         with self.__set_lock:
-            for opob in self.__op_list:
-                if opob.op_type == Logoutput.op_type:
-                    return opob
+            for opobj in self.__op_list:
+                if opobj.op_type == Logoutput.op_type:
+                    return opobj
 
             else:
                 return None
-
 
     #! fallibility
     def get_stdop_ident(self) -> Union[int, None]:
         with self.__set_lock:
-            for opob in self.__op_list:
-                if opob.op_type == Logoutput.op_type:
-                    return opob.op_ident
+            for opobj in self.__op_list:
+                if opobj.op_type == Logoutput.op_type:
+                    return opobj.op_ident
 
             else:
                 return None
-
 
     #! fallibility
     def __try_op_call(self, content: dict) -> None:
@@ -359,112 +344,97 @@ class Logging(object):
                     except Exception: ...
 
 
-    def call(self, level: int = INFO, levelname: str = 'INFO', message: str = '',
-             *, double_back: bool = False) -> None:
+    def __try_op_call_asynchronous(self) -> None:
+        with self.__call_lock:
+            if not len(self.__message_list): return None
+
+            content = self.__message_list[0]
+            del self.__message_list[0]
+
+        self.__try_op_call(content)
 
         with self.__call_lock:
-            if level < self.__level:
-                return None
-
-            now = datetime.datetime.now()
-
-            content = {}
-            content['level'] = level
-            content['levelname'] = levelname
-            content['message'] = message
-
-            content['date'] = now.strftime('%Y-%m-%d')
-            content['time'] = now.strftime('%H:%M:%S')
-            content['moment'] = now.strftime('%f')[:3]
-            content['micro'] = now.strftime('%f')[3:]
-
-            content['process'] = multiprocessing.current_process().name
-            content['thread'] = threading.current_thread().name
-
-            if double_back: frame = inspect.currentframe().f_back.f_back
-            else: frame = inspect.currentframe().f_back
-
-            abspath = os.path.abspath(frame.f_code.co_filename)
-            local = os.path.join(sys.path[0], '')
-            slen = len(local)
-            if abspath[:slen] == local: file = abspath[slen:]
-            else: file = abspath
-
-            content['file'] = file
-            content['filepath'] = abspath
-            content['filename'] = os.path.basename(file)
-            content['function'] = frame.f_code.co_name
-            content['line'] = frame.f_lineno
-
-            self.__try_op_call(content)
+            if not len(self.__message_list): return None
+            else: self.__try_op_call_asynchronous()
 
 
-    def TRACE(self, message: object = '', *args: None, **kwds: None):
+    def __run_cycle(self, *args, **kwds):
+        while True:
+            print(1)
+            self.__call_event.wait()
+            self.__try_op_call_asynchronous()
+            self.__call_event.clear()
+
+
+    def __run_call_asynchronous(self, content: dict) -> None:
+        with self.__call_lock: self.__message_list.append(content)
+        self.__call_event.set()
+
+
+    def __run_call(self, content: dict) -> None:
+        if self.__asynchronous: self.__run_call_asynchronous(content)
+        else: self.__try_op_call(content)
+
+
+    def call(self, level: int = INFO, levelname: str = 'INFO', message: str = '', *, double_back: bool = False) -> None:
+        if level < self.__level: return None
+
+        now = datetime.datetime.now()
+
+        content = {}
+        content['level'] = level
+        content['levelname'] = levelname
+        content['message'] = message
+
+        content['date'] = now.strftime('%Y-%m-%d')
+        content['time'] = now.strftime('%H:%M:%S')
+        content['moment'] = now.strftime('%f')[:3]
+        content['micro'] = now.strftime('%f')[3:]
+
+        content['process'] = multiprocessing.current_process().name
+        content['thread'] = threading.current_thread().name
+
+        if double_back: frame = inspect.currentframe().f_back.f_back
+        else: frame = inspect.currentframe().f_back
+
+        abspath = os.path.abspath(frame.f_code.co_filename)
+        local = os.path.join(sys.path[0], '')
+        slen = len(local)
+        if abspath[:slen] == local: file = abspath[slen:]
+        else: file = abspath
+
+        content['file'] = file
+        content['filepath'] = abspath
+        content['filename'] = os.path.basename(file)
+        content['function'] = frame.f_code.co_name
+        content['line'] = frame.f_lineno
+
+        self.__run_call(content)
+
+
+    def trace(self, message: object = ''):
         self.call(TRACE, 'TRACE', message, double_back=True)
 
-    def DEBUG(self, message: object = '', *args: None, **kwds: None):
+    def debug(self, message: object = ''):
         self.call(DEBUG, 'DEBUG', message, double_back=True)
 
-    def INFO(self, message: object = '', *args: None, **kwds: None):
+    def info(self, message: object = ''):
         self.call(INFO, 'INFO', message, double_back=True)
 
-    def WARN(self, message: object = '', *args: None, **kwds: None):
+    def warn(self, message: object = ''):
         self.call(WARN, 'WARN', message, double_back=True)
 
-    def WARNING(self, message: object = '', *args: None, **kwds: None):
+    def warning(self, message: object = ''):
         self.call(WARNING, 'WARNING', message, double_back=True)
 
-    def SEVERE(self, message: object = '', *args: None, **kwds: None):
+    def severe(self, message: object = ''):
         self.call(SEVERE, 'SEVERE', message, double_back=True)
 
-    def ERROR(self, message: object = '', *args: None, **kwds: None):
+    def error(self, message: object = ''):
         self.call(ERROR, 'ERROR', message, double_back=True)
 
-    def FATAL(self, message: object = '', *args: None, **kwds: None):
+    def fatal(self, message: object = ''):
         self.call(FATAL, 'FATAL', message, double_back=True)
 
-    def CRITICAL(self, message: object = '', *args: None, **kwds: None):
+    def critical(self, message: object = ''):
         self.call(CRITICAL, 'CRITICAL', message, double_back=True)
-
-    def trace(self, message: object = '', *args: None, **kwds: None):
-        self.call(TRACE, 'TRACE', message, double_back=True)
-
-    def debug(self, message: object = '', *args: None, **kwds: None):
-        self.call(DEBUG, 'DEBUG', message, double_back=True)
-
-    def info(self, message: object = '', *args: None, **kwds: None):
-        self.call(INFO, 'INFO', message, double_back=True)
-
-    def warn(self, message: object = '', *args: None, **kwds: None):
-        self.call(WARN, 'WARN', message, double_back=True)
-
-    def warning(self, message: object = '', *args: None, **kwds: None):
-        self.call(WARNING, 'WARNING', message, double_back=True)
-
-    def severe(self, message: object = '', *args: None, **kwds: None):
-        self.call(SEVERE, 'SEVERE', message, double_back=True)
-
-    def error(self, message: object = '', *args: None, **kwds: None):
-        self.call(ERROR, 'ERROR', message, double_back=True)
-
-    def fatal(self, message: object = '', *args: None, **kwds: None):
-        self.call(FATAL, 'FATAL', message, double_back=True)
-
-    def critical(self, message: object = '', *args: None, **kwds: None):
-        self.call(CRITICAL, 'CRITICAL', message, double_back=True)
-
-
-    def print(self, message: object = '') -> None:
-        opob = self.get_stdop_object()
-        if isinstance(opob, Logoutput):
-            content = {}
-            content['message'] = message
-            with self.__call_lock:
-                opob.call(message, '$(.message)')
-
-
-
-
-
-# 使用 sys.stdout.write() 而不是 print()
-
