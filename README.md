@@ -1,6 +1,6 @@
 # logop
 
-一个简易的 Python 日志输出模块
+一个简易的日志输出模块
 
 
 
@@ -92,22 +92,22 @@ logop.FORMAT.SIMPLE
 
 ## 日志格式可用信息
 
-| 属性名称   | 格式          | 描述         | 示例          |
-| :--------- | :------------ | :----------- | :------------ |
-| .level     | $(.level)     | 日志等级     | 0             |
-| .levelname | $(.levelname) | 等级名称     | INFO          |
-| .date      | $(.date)      | 日期         | 2020-04-01    |
-| .time      | $(.time)      | 时间         | 08:00:00      |
-| .moment    | $(.moment)    | 毫秒         | 123           |
-| .micro     | $(.micro)     | 微秒         | 512           |
-| .file      | $(.file)      | 文件相对路径 | lib/a.py      |
-| .filepath  | $(.filepath)  | 文件绝对路径 | /opt/lib/a.py |
-| .filename  | $(.filename)  | 文件名       | a.py          |
-| .process   | $(.process)   | 进程名       | Process       |
-| .thread    | $(.thread)    | 线程名       | Main          |
-| .function  | $(.function)  | 函数         | run           |
-| .line      | $(.line)      | 行           | 56            |
-| .message   | $(.message)   | 消息         | Hello world   |
+| 属性名称   | 格式          | 描述         | 数据类型 | 示例          |
+| :--------- | :------------ | :----------- | :------- | :------------ |
+| .level     | $(.level)     | 日志等级     | int      | 0             |
+| .levelname | $(.levelname) | 等级名称     | str      | INFO          |
+| .date      | $(.date)      | 日期         | str      | 2020-04-01    |
+| .time      | $(.time)      | 时间         | str      | 08:00:00      |
+| .moment    | $(.moment)    | 毫秒         | str      | 123           |
+| .micro     | $(.micro)     | 微秒         | str      | 512           |
+| .file      | $(.file)      | 文件相对路径 | str      | lib/a.py      |
+| .filepath  | $(.filepath)  | 文件绝对路径 | str      | /opt/lib/a.py |
+| .filename  | $(.filename)  | 文件名       | str      | a.py          |
+| .process   | $(.process)   | 进程名       | str      | Process       |
+| .thread    | $(.thread)    | 线程名       | str      | Main          |
+| .function  | $(.function)  | 函数         | str      | run           |
+| .line      | $(.line)      | 行           | int      | 56            |
+| .message   | $(.message)   | 消息         | str      | Hello world   |
 
 例: `"[$(.date) $(.time)] [$(.thread)/$(.levelname)] $(.message)"`
 
@@ -116,11 +116,14 @@ logop.FORMAT.SIMPLE
 ## Logging 日志对象
 
 ```Python
-logop.Logging(level: int = INFO, op_format: str = FORMAT.DEFAULT, *, stdout: bool = True)
+logop.Logging(level: int = INFO, op_format: str = FORMAT.DEFAULT, *, stdout: bool = True,
+              asynchronous: bool = False, threadname: str = 'LoggingThread')
 # 初始化一个日志对象
 # level: 日志等级, 低于这个等级的日志不会被显示/输出, 建议通过日志等级常量设置.
 # op_format: 日志格式, 日志消息的组合方式, 输出对象不一定会遵守这个格式.
 # stdout: 是否自动初始化一个标准输出对象.
+# asynchronous: 创建一个线程让日志对象异步执行.
+# threadname: 线程名称, 仅在 asynchronous 为 True 时生效.
 
 
 .setlevel(level: int) -> None
@@ -175,7 +178,11 @@ logop.Logging(level: int = INFO, op_format: str = FORMAT.DEFAULT, *, stdout: boo
 .error(message) -> None
 .fatal(message) -> None
 .critical(message) -> None
-# 同上类似
+# 同上
+
+
+
+# *注意: 以下方法在 0.3.0 版本中被移除.
 
 .TRACE(message) -> None
 .DEBUG(message) -> None
@@ -186,7 +193,7 @@ logop.Logging(level: int = INFO, op_format: str = FORMAT.DEFAULT, *, stdout: boo
 .ERROR(message) -> None
 .FATAL(message) -> None
 .CRITICAL(message) -> None
-# 同上类似, 大写方法名只是为了满足部分癖好
+# 同上, 大写方法名只是为了满足部分癖好
 
 .print(message: object = '') -> None
 # 将消息使用标准输出对象输出
@@ -232,6 +239,27 @@ logop.Logoutput(name: str = ...)
 # 异常计数
 # 记录该输出对象出现异常的次数
 ```
+
+
+
+## Logop_standard (标准)标准输出对象
+
+```Python
+logop.Logop_standard()
+# 继承 Logoutput
+# 将日志写到标准输出 stdout / stderr.
+```
+
+
+
+## Logop_standard_up 简单着色 - (标准)输出对象
+
+```Python
+logop.Logop_standard_up()
+# 继承 Logoutput
+# 将日志写到标准输出 stdout / stderr.
+```
+
 
 
 ## Logop_file 日志文件 - 输出对象
