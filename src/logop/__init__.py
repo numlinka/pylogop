@@ -14,7 +14,7 @@ import multiprocessing
 from typing import Union
 
 
-__version__ = "0.3.0"
+__version__ = "0.3.2"
 
 
 ALL      = - 0x80
@@ -360,7 +360,6 @@ class Logging(object):
 
     def __run_cycle(self, *args, **kwds):
         while True:
-            print(1)
             self.__call_event.wait()
             self.__try_op_call_asynchronous()
             self.__call_event.clear()
