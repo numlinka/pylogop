@@ -14,7 +14,7 @@ import multiprocessing
 from typing import Union
 
 
-__version__ = "0.3.2"
+__version__ = "0.4.0"
 
 
 ALL      = - 0x80
@@ -30,7 +30,8 @@ CRITICAL =   0x60
 OFF      =   0x7F
 
 
-variable_table = """ $(variable)
+
+VARIABLE_TABLE = """ $(variable)
 .level      日志等级
 .levelname  等级名称
 .date       日期
@@ -48,6 +49,7 @@ variable_table = """ $(variable)
 """
 
 
+
 class FORMAT(object):
     # 朴素
     SIMPLE = '[$(.levelname)] $(.message)'
@@ -57,6 +59,21 @@ class FORMAT(object):
 
     # 调试
     DEBUG = '[$(.date) $(.time).$(.moment)] $(.file) [$(.thread)/$(.levelname)] [line:$(.line)] $(.message)'
+
+
+
+levelTable = {
+    'trace': (TRACE, 'TRACE'),
+    'debug': (DEBUG, 'DEBUG'),
+    'info': (INFO, 'INFO'),
+    'warn': (WARN, 'WARN'),
+    'warning': (WARNING, 'WARNING'),
+    'severe': (SEVERE, 'SEVERE'),
+    'error': (ERROR, 'ERROR'),
+    'fatal': (FATAL, 'FATAL'),
+    'critical': (CRITICAL, 'CRITICAL')
+}
+
 
 
 def op_character_variable(op_format: str, table: dict) -> str:
@@ -74,7 +91,7 @@ def op_character_variable(op_format: str, table: dict) -> str:
 
 
 
-class Logoutput(object):
+class BaseLogop(object):
     op_type = 'standard'
     op_name = 'standard'
     op_ident = 0
@@ -94,7 +111,7 @@ class Logoutput(object):
 
 
 
-class Logop_standard(Logoutput):
+class Logop_standard(BaseLogop):
     def call(self, content: dict, op_format: str = FORMAT.DEFAULT) -> None:
         if not isinstance(content, dict):
             raise TypeError('content is not of type dict')
@@ -119,7 +136,7 @@ class Logop_standard(Logoutput):
 
 
 
-class Logop_standard_up(Logoutput):
+class Logop_standard_up(BaseLogop):
     def call(self, content: dict, op_format: str = FORMAT.DEFAULT) -> None:
         if not isinstance(content, dict):
             raise TypeError('content is not of type dict')
@@ -154,7 +171,7 @@ class Logop_standard_up(Logoutput):
 
 
 
-class Logop_file(Logoutput):
+class Logop_file(BaseLogop):
     op_name = 'logfile'
     op_type = 'logfile'
 
@@ -247,15 +264,15 @@ class Logging(object):
             self.__op_format = op_format
 
     #! fallibility
-    def add_op(self, target: Logoutput) -> None:
+    def add_op(self, target: BaseLogop) -> None:
         with self.__set_lock:
-            if not isinstance(target, Logoutput):
+            if not isinstance(target, BaseLogop):
                 raise TypeError('The target type is not op_object')
 
             if len(self.__op_list) > 0x10:
                 raise Warning('There are too many op objects')
 
-            standard = Logoutput.op_type
+            standard = BaseLogop.op_type
             typelist = [x.op_type for x in self.__op_list]
 
             if standard in typelist and target.op_type == standard:
@@ -302,7 +319,7 @@ class Logging(object):
             return count
 
     #! fallibility
-    def get_op_object(self, ident: int) -> Union[Logoutput, None]:
+    def get_op_object(self, ident: int) -> Union[BaseLogop, None]:
         with self.__set_lock:
             for opobj in self.__op_list:
                 if opobj.op_ident == ident:
@@ -312,10 +329,10 @@ class Logging(object):
                 return None
 
     #! fallibility
-    def get_stdop_object(self) -> Union[Logoutput, None]:
+    def get_stdop_object(self) -> Union[BaseLogop, None]:
         with self.__set_lock:
             for opobj in self.__op_list:
-                if opobj.op_type == Logoutput.op_type:
+                if opobj.op_type == BaseLogop.op_type:
                     return opobj
 
             else:
@@ -325,7 +342,7 @@ class Logging(object):
     def get_stdop_ident(self) -> Union[int, None]:
         with self.__set_lock:
             for opobj in self.__op_list:
-                if opobj.op_type == Logoutput.op_type:
+                if opobj.op_type == BaseLogop.op_type:
                     return opobj.op_ident
 
             else:
@@ -411,6 +428,16 @@ class Logging(object):
         self.__run_call(content)
 
 
+    def __get_call(self, alias: str = 'info'):
+        def call_table(message: object = ''):
+            nonlocal self
+            nonlocal alias
+            level, name = levelTable[alias]
+            self.call(level, name, message, double_back=True)
+
+        return call_table
+
+
     def trace(self, message: object = ''):
         self.call(TRACE, 'TRACE', message, double_back=True)
 
@@ -437,3 +464,8 @@ class Logging(object):
 
     def critical(self, message: object = ''):
         self.call(CRITICAL, 'CRITICAL', message, double_back=True)
+
+
+    def __getattr__(self, __name):
+        if __name in levelTable: return self.__get_call(__name)
+        else: raise AttributeError('This alias is not defined in the level table')
