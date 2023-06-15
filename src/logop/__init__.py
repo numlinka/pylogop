@@ -1,4 +1,4 @@
-# -*- codeing:utf-8 -*-
+# -*- coding:utf-8 -*-
 
 # *project:     pylogop
 # *Author:      numLinka
@@ -14,18 +14,18 @@ import multiprocessing
 from typing import Union
 
 
-__version__ = "0.4.0"
+__version__ = "0.6.1"
 
 
-ALL      = - 0x80
-TRACE    = - 0x40   # - 0x50 -> - 0x31
-DEBUG    = - 0x20   # - 0x30 -> - 0x11
-INFO     =   0x00   # - 0x10 ->   0x0F   stdout
-WARN     =   0x20   #   0x10 ->   0x2F   stderr
+ALL      = ~ 0x7F
+TRACE    = ~ 0x40
+DEBUG    = ~ 0x20
+INFO     =   0x00
+WARN     =   0x20
 WARNING  =   0x20
 SEVERE   =   0x30
-ERROR    =   0x40   #   0x30 ->   0x4F
-FATAL    =   0x60   #   0x50 ->   0x6F
+ERROR    =   0x40
+FATAL    =   0x60
 CRITICAL =   0x60
 OFF      =   0x7F
 
@@ -51,13 +51,10 @@ VARIABLE_TABLE = """ $(variable)
 
 
 class FORMAT(object):
-    # 朴素
     SIMPLE = '[$(.levelname)] $(.message)'
 
-    # 默认
     DEFAULT = '[$(.date) $(.time)] [$(.thread)/$(.levelname)] $(.message)'
 
-    # 调试
     DEBUG = '[$(.date) $(.time).$(.moment)] $(.file) [$(.thread)/$(.levelname)] [line:$(.line)] $(.message)'
 
 
@@ -73,15 +70,16 @@ levelTable = {
     'fatal': (FATAL, 'FATAL'),
     'critical': (CRITICAL, 'CRITICAL')
 }
+# ? levelTable[alias] = [level, levelname]
 
 
 
 def op_character_variable(op_format: str, table: dict) -> str:
     if not isinstance(op_format, str):
-        raise TypeError('op_format is not of type str')
+        raise TypeError('The op_format type is not str.')
 
     if not isinstance(table, dict):
-        raise TypeError('table is not of type dict')
+        raise TypeError('The table type is not dict.')
 
     op = op_format
     for key, value in table.items():
@@ -114,60 +112,60 @@ class BaseLogop(object):
 class Logop_standard(BaseLogop):
     def call(self, content: dict, op_format: str = FORMAT.DEFAULT) -> None:
         if not isinstance(content, dict):
-            raise TypeError('content is not of type dict')
+            raise TypeError('The content type is not dict.')
 
         if not isinstance(op_format, str):
-            raise TypeError('op_format is not of type str')
+            raise TypeError('The type op_format is not str.')
 
         if '$(.message)' not in op_format:
-            raise ValueError('$(.message) must be included in format')
+            raise ValueError('$(.message) must be included in format.')
 
         op = op_character_variable(op_format, content)
         ops = f'{op}\n'
         level = content.get('level', 0)
 
-        if level < 0x10:
+        if level < ERROR:
             sys.stdout.write(ops)
             sys.stdout.flush()
 
         else:
             sys.stderr.write(ops)
-            sys.stdout.flush()
+            sys.stderr.flush()
 
 
 
 class Logop_standard_up(BaseLogop):
     def call(self, content: dict, op_format: str = FORMAT.DEFAULT) -> None:
         if not isinstance(content, dict):
-            raise TypeError('content is not of type dict')
+            raise TypeError('The content type is not dict.')
 
         if not isinstance(op_format, str):
-            raise TypeError('op_format is not of type str')
+            raise TypeError('The op_format type is not str.')
 
         if '$(.message)' not in op_format:
-            raise ValueError('$(.message) must be included in format')
+            raise ValueError('$(.message) must be included in format.')
 
         op = op_character_variable(op_format, content)
         level = content.get('level', 0)
         if level < 0x10:
             ops = f'{op}\n'
 
-        elif 0x10 <= level < 0x40:
+        elif WARN <= level < ERROR:
             ops = f'\033[1;33m{op}\033[0m\n'
 
-        elif 0x40 <= level < 0x80:
+        elif ERROR <= level <= OFF:
             ops = f'\033[1;31m{op}\033[0m\n'
 
         else:
-            ops = f'{op}\n'
+            ops = f'\033[0m{op}\033[0m\n'
 
-        if level < 0x10:
+        if level < ERROR:
             sys.stdout.write(ops)
             sys.stdout.flush()
 
         else:
             sys.stderr.write(ops)
-            sys.stdout.flush()
+            sys.stderr.flush()
 
 
 
@@ -182,10 +180,10 @@ class Logop_file(BaseLogop):
             self.op_name = name
 
         if not isinstance(pathdir, (str, list, tuple)):
-            raise TypeError('The pathdir type is not str, list or tuple')
+            raise TypeError('The pathdir type is not str, list or tuple.')
 
         if not isinstance(pathname, str):
-            raise TypeError('The pathname type is not str')
+            raise TypeError('The pathname type is not str.')
 
         if isinstance(pathdir, str):
             self._pathdir = pathdir
@@ -194,7 +192,7 @@ class Logop_file(BaseLogop):
             self._pathdir = os.path.join(pathdir)
 
         else:
-            raise Exception('Errors that should not occur')
+            raise Exception('Errors that should not occur.')
 
         self._pathname = pathname
         self._encoding = encoding
@@ -218,48 +216,58 @@ class Logop_file(BaseLogop):
 
 
 class Logging(object):
-    __level = INFO
-    __op_format = FORMAT.DEFAULT
-    __op_list = []
-
-
     def __init__(self, level: int = INFO, op_format: str = FORMAT.DEFAULT,
                  *, stdout: bool = True, asynchronous: bool = False, threadname: str = 'LoggingThread'):
+        self.__level = INFO
+        self.__op_format = FORMAT.DEFAULT
+        self.__op_list = []
+
         self.__call_lock = threading.RLock()
         self.__set_lock = threading.RLock()
+        self.__is_close = False
 
         self.setlevel(level)
         self.setformat(op_format)
 
         if stdout: self.add_op(Logop_standard())
 
-        self.__asynchronous = True if asynchronous else False
+        self.__asynchronous = bool(asynchronous)
 
         if self.__asynchronous:
             self.__call_event = threading.Event()
             self.__message_list = []
-            self.__asynchronous_task = threading.Thread(None,self.__run_cycle, threadname, (), {}, daemon=True)
+            self.__asynchronous_task = threading.Thread(None,self.__run_cycle, threadname, (), {}, daemon=False)
             self.__asynchronous_task.start()
+            self.__asynchronous_stop = False
 
 
-    def setlevel(self, level: int) -> None:
+    def setlevel(self, level:   Union[int, str]) -> None:
         with self.__set_lock:
-            if not isinstance(level, int):
-                raise TypeError('level is not of type int')
+            if isinstance(level, int):
+                lv = level
 
-            if not -0x80 <= level <= 0x7F:
-                raise ValueError('level should be somewhere between -0x80 to 0x7F ')
+            elif isinstance(level, str):
+                if level not in levelTable:
+                    raise ValueError('The level alias does not exist.')
 
-            self.__level = level
+                lv = levelTable[level][0]
+
+            else:
+                raise TypeError('The level type is not int.')
+
+            if not -0x80 <= lv <= 0x7F:
+                raise ValueError('level should be somewhere between -0x80 to 0x7F .')
+
+            self.__level = lv
 
 
     def setformat(self, op_format: str) -> None:
         with self.__set_lock:
             if not isinstance(op_format, str):
-                raise TypeError('op_format is not of type str')
+                raise TypeError('The op_format type is not str.')
 
             if '$(.message)' not in op_format:
-                raise ValueError('$(.message) must be included in format')
+                raise ValueError('$(.message) must be included in format.')
 
             self.__op_format = op_format
 
@@ -267,16 +275,16 @@ class Logging(object):
     def add_op(self, target: BaseLogop) -> None:
         with self.__set_lock:
             if not isinstance(target, BaseLogop):
-                raise TypeError('The target type is not op_object')
+                raise TypeError('The target type is not op_object.')
 
             if len(self.__op_list) > 0x10:
-                raise Warning('There are too many op objects')
+                raise Warning('There are too many op objects.')
 
             standard = BaseLogop.op_type
             typelist = [x.op_type for x in self.__op_list]
 
             if standard in typelist and target.op_type == standard:
-                raise ValueError('Only one standard op_object can exist')
+                raise ValueError('Only one standard op_object can exist.')
 
             identlist = [x.op_ident for x in self.__op_list]
             if identlist:
@@ -295,7 +303,7 @@ class Logging(object):
                 if op.op_ident == ident:
                     break
             else:
-                raise ValueError('The ident value does not exist')
+                raise ValueError('The ident value does not exist.')
 
             del self.__op_list[index]
 
@@ -348,6 +356,36 @@ class Logging(object):
             else:
                 return None
 
+
+    def join(self, timeout: Union[float, None] = None) -> None:
+        if not self.__asynchronous:
+            raise RuntimeError("The logging mode is not asynchronous.")
+
+        self.__asynchronous_task.join(timeout)
+
+
+    def close(self) -> None:
+        with self.__set_lock:
+            # if self.__is_close:
+            #     raise RuntimeError("")
+
+            # if not self.__asynchronous:
+            #     raise RuntimeError("The logging mode is not asynchronous.")
+
+            # if self.__asynchronous_stop:
+            #     raise RuntimeError("This method can only be called once.")
+
+            self.__is_close = True
+
+            if self.__asynchronous:
+                self.__asynchronous_stop = True
+                self.__call_event.set()
+
+
+    def is_close(self) -> bool:
+        with self.__set_lock:
+            return self.__is_close
+
     #! fallibility
     def __try_op_call(self, content: dict) -> None:
         with self.__set_lock:
@@ -380,6 +418,8 @@ class Logging(object):
             self.__call_event.wait()
             self.__try_op_call_asynchronous()
             self.__call_event.clear()
+            if self.__asynchronous_stop:
+                raise SystemExit()
 
 
     def __run_call_asynchronous(self, content: dict) -> None:
@@ -393,6 +433,10 @@ class Logging(object):
 
 
     def call(self, level: int = INFO, levelname: str = 'INFO', message: str = '', *, double_back: bool = False) -> None:
+        with self.__set_lock:
+            if self.__is_close:
+                raise ValueError("call of closed logging.")
+
         if level < self.__level: return None
 
         now = datetime.datetime.now()
@@ -468,4 +512,4 @@ class Logging(object):
 
     def __getattr__(self, __name):
         if __name in levelTable: return self.__get_call(__name)
-        else: raise AttributeError('This alias is not defined in the level table')
+        else: raise AttributeError('This alias is not defined in the level table.')

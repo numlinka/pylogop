@@ -1,4 +1,4 @@
-# logop
+# pylogop
 
 一个简易的日志输出模块
 
@@ -159,7 +159,7 @@ logop.BaseLogop(name: str = ...)
 
 .add_exception_count() -> None
 # 增加异常计数
-# 在日志对象调用输出对象的 call 方法发送异常时会调用这个方法,
+# 在日志对象调用输出对象的 call 方法发生异常时会调用这个方法,
 # 使得输出对象内部的异常计数 + 1.
 
 
@@ -229,9 +229,10 @@ logop.Logging(level: int = INFO, op_format: str = FORMAT.DEFAULT, *, stdout: boo
 # threadname: 线程名称, 仅在 asynchronous 为 True 时生效.
 
 
-.setlevel(level: int) -> None
+.setlevel(level: int | str) -> None
 # 设置日志等级
-# 低于这个等级的日志不会被显示/输出, 建议通过日志等级常量设置.
+# 低于这个等级的日志不会被显示/输出, 可以通过日志等级常量设置.
+# 也可以通过日志等级别名设置, 这个别名必须是存在于 levelTable 中的.
 
 .setformat(op_format: str) -> None
 # 设置日志格式
@@ -262,6 +263,21 @@ logop.Logging(level: int = INFO, op_format: str = FORMAT.DEFAULT, *, stdout: boo
 # 获取到标准输出对象
 # 当存在标准输出对象时返回输出对象, 否则返回 None.
 
+# v0.6.0 new
+.join(timeout: float | None = None) -> None
+# 等待日志记录器线程结束
+# 仅在异步模式下有效, 否则抛出 RuntimeError 异常.
+# timeout: 超时时间, 单位为秒.
+
+# v0.6.0 new
+.close() -> None
+# 关闭日志记录器
+# 关闭之后日志记录器不再可用.
+
+# v0.6.0 new
+.is_close() -> bool
+# 日志记录器是否已被关闭
+
 .call(level: int = INFO, levelname: str = 'INFO', message: str = '',
       *, double_back: bool = False) -> None
 # 输出日志
@@ -269,6 +285,8 @@ logop.Logging(level: int = INFO, op_format: str = FORMAT.DEFAULT, *, stdout: boo
 # levelname: 日志名称, 任意, 但推荐为 INFO, WARN, ERROR, DEBUG 等标准名称.
 # message: 日志消息.
 # double_back: 是否要从上上个栈帧中获取状态信息, 对该方法进行包装时会用到它.
+# v0.6.0 new
+# 若日志记录器被关闭, 会直接抛出 ValueError 异常.
 
 .trace(message) -> None
 # 输出一个 TRACE 级别的日志
