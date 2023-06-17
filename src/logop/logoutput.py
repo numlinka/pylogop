@@ -23,6 +23,20 @@ def op_character_variable(op_format: str, table: dict) -> str:
     return op
 
 
+def set_windows_console_mode():
+    if sys.platform == "win32":
+        try:
+            from ctypes import windll
+            kernel32 = windll.kernel32
+            kernel32.SetConsoleMode(kernel32.GetStdHandle(-11), 7)
+            return True
+
+        except ImportError:
+            return False
+
+    return False
+
+
 
 class BaseLogop (object):
     """日志输出对象"""
@@ -92,6 +106,7 @@ class LogopStandardPlus (BaseLogop):
             ERROR: "1;33",
             OFF: "1;31",
         }
+        set_windows_console_mode()
 
 
     def _get_color_code(self, level) -> str:
@@ -126,7 +141,7 @@ class LogopStandardPlus (BaseLogop):
 class LogopFile (BaseLogop):
     """日志输出 文件型
 
-    将带有颜色的日志信息输出到控制台
+    将日志信息输出到文件
     """
     op_name = 'logfile'
     op_type = 'logfile'

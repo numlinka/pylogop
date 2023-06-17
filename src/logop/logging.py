@@ -92,6 +92,8 @@ class Logging (object):
 
         输出日志内容的格式, `Logging` 不会处理日志内容, 而是将它传递给 `Logop` 对象.
         """
+        self.__close_check()
+
         with self.__set_lock:
             if not isinstance(op_format, str):
                 raise TypeError("The op_format type is not str.")
@@ -104,6 +106,8 @@ class Logging (object):
 
     def add_op(self, target: logoutput.BaseLogop) -> None:
         """添加输出对象到列表中"""
+        self.__close_check()
+
         with self.__set_lock:
             if not isinstance(target, logoutput.BaseLogop):
                 raise TypeError("The target type is not Logop object.")
@@ -213,7 +217,7 @@ class Logging (object):
         if not self.__asynchronous:
             raise RuntimeError("The logging mode is not asynchronous.")
 
-        self.__asynchronous_task.join(timeout)
+        return self.__asynchronous_task.join(timeout)
 
 
     def close(self) -> None:
@@ -285,7 +289,7 @@ class Logging (object):
     def call(self, level: int = INFO, levelname: str = "INFO", message: str = "", mark: str = "",
              *, double_back: bool = False) -> None:
         """输出日志
-        
+
         level: 日志级别
 
         levelname: 级别名称
