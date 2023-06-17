@@ -48,9 +48,9 @@ class Logging (object):
         if self.__asynchronous:
             self.__call_event = threading.Event()
             self.__message_list = []
-            self.__asynchronous_task = threading.Thread(None,self.__async_mainloop, threadname, (), {}, daemon=False)
-            self.__asynchronous_task.start()
             self.__asynchronous_stop = False
+            self.__asynchronous_task = threading.Thread(None, self.__async_mainloop, threadname, (), {}, daemon=False)
+            self.__asynchronous_task.start()
 
 
     def __close_check(self) -> None:
