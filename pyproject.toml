@@ -4,9 +4,9 @@ build-backend = "hatchling.build"
 
 [project]
 name = "logop"
-version = "1.0.2"
+version = "1.0.3"
 authors = [
-  { name="numLinka", email="" },
+  { name="numLinka", email="numlinka@163.com" },
 ]
 description = "A simple log module"
 readme = "README.md"

@@ -20,7 +20,7 @@ pylogop 是一个轻量型的日志模块，用于记录日志信息。
 
 ## 安装
 
-安装 pylogop 的首选方式是通过 pip
+推荐使用 pip 按安装 pylogop
 
 `pip install logop`
 
@@ -71,6 +71,7 @@ logging.add_op(logoutput)
 ```
 
 输出日志
+
 ```Python
 logging.info("Hello word")
 logging.warn("WARN")

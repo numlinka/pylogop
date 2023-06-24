@@ -11,7 +11,7 @@ LogopStandard、LogopStandardPlus 和 LogopFile，它们都是日志输出对象
 .op_character_variable(op_format: str, table: dict) -> str
 # 将日志格式转换成完整的日志消息
 # op_format: 日志格式
-# table: 日志信息表; 通常情况下 BaseLogop.call 可以直接提供 content 参数所接收到的内容 )
+# table: 日志信息表; 通常情况下 BaseLogop.call 可以直接提供 content 参数所接收到的内容
 ```
 
 ## logop.logoutput.BaseLogop 日志输出对象
@@ -59,7 +59,7 @@ logop.logoutput.BaseLogop(name: str = ...)
 ```
 
 
-## LogopStandard 输出对象 标准型
+## LogopStandard 标准输出对象
 
 ```Python
 logop.logoutput.LogopStandard()
@@ -68,7 +68,7 @@ logop.logoutput.LogopStandard()
 ```
 
 
-## LogopStandardPlus 输出对象 标准型 控制台着色
+## LogopStandardPlus 标准输出对象+
 
 ```Python
 logop.logoutput.LogopStandardPlus()
@@ -77,13 +77,13 @@ logop.logoutput.LogopStandardPlus()
 ```
 
 
-## LogopFile 日志文件 - 输出对象
+## LogopFile 文件输出对象
 
 ```Python
 logop.logoutput.Logop_file(name: str = ..., pathdir: Union[str, list, tuple] = 'logs',
                            pathname: str = '$(.date).log', encoding: str = 'utf-8')
 # name: 同 BaseLogop
-# pathdir: 保存日志文件的文件夹路径, 多级路径可以通过列表和元组的方式传入.
+# pathdir: 保存日志文件的文件夹路径, 多级路径可以通过列表或元组的形式传入.
 # pathname: 日志的文件名.
 # encoding: 文件编码.
 ```
