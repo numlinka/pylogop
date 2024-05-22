@@ -1,0 +1,86 @@
+# Licensed under the MIT License.
+# logop by numlinka.
+
+
+ALL = ~ 0x7F
+TRACE = ~ 0x40
+DEBUG = ~ 0x20
+INFO = 0x00
+WARN = 0x20
+WARNING = 0x20
+ERROR = 0x40
+SEVERE = 0x60
+CRITICAL = 0x60
+FATAL = 0x70
+OFF = 0x7F
+
+TRACE_NAME = "TRACE"
+DEBUG_NAME = "DEBUG"
+INFO_NAME = "INFO"
+WARN_NAME = "WARN"
+WARNING_NAME = "WARNING"
+ERROR_NAME = "ERROR"
+SEVERE_NAME = "SEVERE"
+CRITICAL_NAME = "CRITICAL"
+FATAL_NAME = "FATAL"
+
+TRACE_ALIAS = "trace"
+DEBUG_ALIAS = "debug"
+INFO_ALIAS = "info"
+WARN_ALIAS = "warn"
+WARNING_ALIAS = "warning"
+ERROR_ALIAS = "error"
+SEVERE_ALIAS = "severe"
+CRITICAL_ALIAS = "critical"
+FATAL_ALIAS = "fatal"
+
+
+LEVEL_TABLE = {
+    TRACE_ALIAS: (TRACE, TRACE_NAME),
+    DEBUG_ALIAS: (DEBUG, DEBUG_NAME),
+    INFO_ALIAS: (INFO, INFO_NAME),
+    WARN_ALIAS: (WARN, WARN_NAME),
+    WARNING_ALIAS: (WARNING, WARNING_NAME),
+    ERROR_ALIAS: (ERROR, ERROR_NAME),
+    SEVERE_ALIAS: (SEVERE, SEVERE_NAME),
+    CRITICAL_ALIAS: (CRITICAL, CRITICAL_NAME),
+    FATAL_ALIAS: (FATAL, FATAL_NAME)
+}
+# ? LEVEL_TABLE[alias] = [level, levelname]
+
+
+__all__ = [
+    "ALL",
+    "TRACE",
+    "DEBUG",
+    "INFO",
+    "WARN",
+    "WARNING",
+    "SEVERE",
+    "ERROR",
+    "CRITICAL",
+    "FATAL",
+    "OFF",
+
+    "TRACE_NAME",
+    "DEBUG_NAME",
+    "INFO_NAME",
+    "WARN_NAME",
+    "WARNING_NAME",
+    "SEVERE_NAME",
+    "ERROR_NAME",
+    "FATAL_NAME",
+    "CRITICAL_NAME",
+
+    "TRACE_ALIAS",
+    "DEBUG_ALIAS",
+    "INFO_ALIAS",
+    "WARN_ALIAS",
+    "WARNING_ALIAS",
+    "SEVERE_NAME",
+    "ERROR_ALIAS",
+    "FATAL_ALIAS",
+    "CRITICAL_ALIAS",
+
+    "LEVEL_TABLE"
+]
