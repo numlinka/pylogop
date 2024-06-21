@@ -42,7 +42,7 @@ class Logging (BaseLogging):
         """
         self.__level = INFO
         self.__op_format = FORMAT_DEFAULT
-        self.__op_list: list[BaseLogop] = []
+        self.__op_list: List[BaseLogop] = []
 
         self.__call_lock = threading.RLock()
         self.__set_lock = threading.RLock()
@@ -165,7 +165,7 @@ class Logging (BaseLogging):
             op: BaseLogop
             op.op_logging_object = None
 
-    def get_op_list(self) -> list[dict]:
+    def get_op_list(self) -> List[dict]:
         """Gets a list of output object information."""
         with self.__set_lock:
             answer = []

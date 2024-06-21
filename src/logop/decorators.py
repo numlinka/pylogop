@@ -20,7 +20,7 @@ _atomic = Atomic()
 
 def callabletrack(
         function: Callable = ..., *, callee: bool = ..., result: bool = ...,
-        exception: bool = ..., logging: BaseLogging = ..., level: str | int = ...
+        exception: bool = ..., logging: BaseLogging = ..., level: Union[str, int] = ...
         ):
     s_function = function
     s_state = TrackStateUnit()
@@ -38,7 +38,7 @@ def callabletrack(
 
     s_level_alias = TRACE_ALIAS
 
-    def level_correct(reference: str | int = ...):
+    def level_correct(reference: Union[str, int] = ...):
         nonlocal s_level_alias
 
         if reference is Ellipsis:
