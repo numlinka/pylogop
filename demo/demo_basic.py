@@ -4,7 +4,7 @@
 
 # std
 import sys
-sys.path.append("src")
+sys.path.insert(0, "src")
 
 # lib
 from logop import *

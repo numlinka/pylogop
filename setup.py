@@ -8,14 +8,15 @@ from setuptools import setup
 
 setup(
     name = "logop",
-    version = "1.2.2",
+    version = "1.2.4",
     description = "This is a lightweight and scalable Python logging library.",
-    long_description = open("README.md", "r", encoding="utf-8").read(),
+    long_description = open("README_PyPI.md", "r", encoding="utf-8").read(),
     long_description_content_type = "text/markdown",
     author = "numlinka",
     author_email = "numlinka@163.com",
     url = "https://github.com/numlinka/pylogop",
-    packages = ["src/logop"],
+    package_dir={"": "src"},
+    packages = ["logop"],
     classifiers=[
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 3",

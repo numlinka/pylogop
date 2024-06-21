@@ -4,7 +4,7 @@
 
 # std
 import sys
-sys.path.append("src")
+sys.path.insert(0, "src")
 
 # lib
 from logop import *
@@ -16,7 +16,7 @@ logger.set_format("[$(.date) $(.time).$(.moment)] [$(.thread)/$(.levelname)] $(.
 
 
 @callabletrack(exception=True)
-def demo_function(a: int, b: int) -> int:
+def demo_function(a: int, b: int) -> float:
     return a / b
 
 
