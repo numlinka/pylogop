@@ -1,20 +1,17 @@
 # Licensed under the MIT License.
-# logop by numlinka.
+# pylogop Copyright (C) 2023 numlinka.
 
-# self
-from .utils import *
-from .levels import *
-from .formats import *
-from .decorators import *
-from .exceptions import *
+# internal
+from . import utils
+from . import typeins
+from . import constants
+from . import exceptions
 
-from .logging_base import *
-from .logging_main import *
-
-from .logoutput_base import *
-from .logoutput_std import *
-from .logoutput_stdplus import *
-from .logoutput_file import *
+from ._ease import ease
+from .base import BaseLogging, BaseOutputStream
+from .stream import StandardOutputStream, StandardOutputStreamPlus, FileOutputStream
+from .logging import Logging
+from .decorators import callabletrack
 
 
 __name__ = "logop"
@@ -22,82 +19,42 @@ __author__ = "numlinka"
 __license__ = "LGPL 3.0"
 __copyright__ = "Copyright (C) 2023 numlinka"
 
-__version_info__ = (1, 2, 4)
+__version_info__ = (1, 3, 0)
 __version__ = ".".join(map(str, __version_info__))
 
 
+"""
+## Dependency graph
+
+decorators
+ |
+_ease
+ |
+logging
+ |
+stream
+ |
+utils
+ |
+_state
+ |
+base
+ |
+typeins / constants / exceptions
+"""
+
+
+# ! __all__ is not declared for `ease`, so you can't import it via `from _ import *`.
 __all__ = [
-    "ALL",
-    "TRACE",
-    "DEBUG",
-    "INFO",
-    "WARN",
-    "WARNING",
-    "SEVERE",
-    "ERROR",
-    "CRITICAL",
-    "FATAL",
-    "OFF",
-
-    "TRACE_NAME",
-    "DEBUG_NAME",
-    "INFO_NAME",
-    "WARN_NAME",
-    "WARNING_NAME",
-    "SEVERE_NAME",
-    "ERROR_NAME",
-    "FATAL_NAME",
-    "CRITICAL_NAME",
-
-    "TRACE_ALIAS",
-    "DEBUG_ALIAS",
-    "INFO_ALIAS",
-    "WARN_ALIAS",
-    "WARNING_ALIAS",
-    "SEVERE_NAME",
-    "ERROR_ALIAS",
-    "FATAL_ALIAS",
-    "CRITICAL_ALIAS",
-
-    "LEVEL",
-    "LEVELNAME",
-    "DATE",
-    "TIME",
-    "MOMENT",
-    "MICRO",
-    "FILE",
-    "FILEPATH",
-    "FILENAME",
-    "PROCESS",
-    "THREAD",
-    "FUNCTION",
-    "LINE",
-    "MESSAGE",
-    "MARK",
-
-    "FORMAT_SIMPLE",
-    "FORMAT_DEFAULT",
-    "FORMAT_DEBUG",
-    "FORMAT_DEFAULT_EXTEND",
-    "FORMAT_DEBUG_EXTEND",
-
-    "LogopBaseException",
-    "LoggingIsClosedError",
-    "LogLevelAliasNotFoundError",
-    "LogLevelExceedsThresholdError",
-    "LogFormatInvalidError",
-    "TooManyStandardTypeLogopObjectError",
-    "ExistingLoggingError",
-    "LogopIdentNotFoundError",
-
-    "BaseLogging",
     "Logging",
-
-    "BaseLogop",
-    "LogopStandard",
-    "LogopStandardPlus",
-    "LogopFile",
-
-    "op_character_variable",
+    "StandardOutputStream",
+    "StandardOutputStreamPlus",
+    "FileOutputStream",
+    "BaseLogging",
+    "BaseOutputStream",
+    "utils",
+    "typeins",
+    "constants",
+    "exceptions",
     "callabletrack"
 ]

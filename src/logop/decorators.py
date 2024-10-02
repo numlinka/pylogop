@@ -2,26 +2,36 @@
 # logop by numlinka.
 
 # std
-import sys
 import inspect
 import traceback
 
-from types import *
-from typing import *
+from types import FrameType
+from typing import Callable, Union, Iterable, Mapping, Any, Optional
 
 # self
-from .units import *
-from .levels import *
-from .logging_base import *
-
-
-_atomic = Atomic()
+from . import _ease
+from . import _state
+from . import utils
+from .base import BaseLogging
+from .typeins import TrackStateUnit
+from .constants import *
 
 
 def callabletrack(
         function: Callable = ..., *, callee: bool = ..., result: bool = ...,
-        exception: bool = ..., logging: BaseLogging = ..., level: Union[str, int] = ...
+        exception: bool = ..., logging: Optional[BaseLogging] = ..., level: Union[str, int] = ...
         ):
+    """
+    Decorator for tracking function calls.
+
+    Arguments:
+        function (Callable): The function to be decorated.
+        callee (bool): Whether to track the caller and callee of the function.
+        result (bool): Whether to track the return value of the function.
+        exception (bool): Whether to track exceptions raised by the function.
+        logging (BaseLogging): The logging instance to use for tracking.
+        level (str | int): The level to use for tracking.
+    """
     s_function = function
     s_state = TrackStateUnit()
     if isinstance(callee, bool):
@@ -43,52 +53,38 @@ def callabletrack(
 
         if reference is Ellipsis:
             s_level_alias = TRACE_ALIAS
+            return
 
-        elif isinstance(reference, (str, int)):
-            for lv_alias, (lv, lv_name) in LEVEL_TABLE.items():
-                if reference in [lv_alias, lv, lv_name]:
-                    s_level_alias = lv_alias
-                    break
+        s_level_alias = utils.level_details(reference).alias
 
-            else:
-                s_level_alias = TRACE_ALIAS
-
-        else:
-            s_level_alias = TRACE_ALIAS
-
-    def log(level_alias: str = ..., message: str = "", mark: str = "", *, back_count: int = 0):
+    def log(level_alias: str = ..., message: str = "", mark: str = "", *, back_count: int = 0, **kwargs):
         nonlocal s_state, s_level_alias
 
         if level_alias is Ellipsis:
             level_alias = s_level_alias
 
-        level, levelname = LEVEL_TABLE[level_alias]
-
-        if isinstance(s_state.logging, BaseLogging):
-            s_state.logging.call(level, levelname, message, mark, back_count=back_count + 1)
-            return
-
-        return
+        logging = s_state.logging if s_state.logging is not Ellipsis else _ease.ease.logging
+        logging.call(level_alias, message, log_mark=mark, back_count=back_count + 1, **kwargs)
 
     def log_callee(iid: int, caller_frame: FrameType, args: Iterable, kwargs: Mapping, *, back_count: int = 0):
         nonlocal s_state, s_function
 
-        msg = f"calltrack iid-{iid}\n"
+        msg = f"calltrack iid-{iid:04}\n"
         msg += f"\tcaller: File \"{caller_frame.f_code.co_filename}\", line {caller_frame.f_lineno} in {caller_frame.f_code.co_name}\n"
         msg += f"\tcallee: File \"{s_function.__code__.co_filename}\", line {s_function.__code__.co_firstlineno} in {s_function.__name__}\n"
-        msg += f"\targs: {args}\n\tkwargs: {kwargs}\n\twait return"
-        log(..., msg, back_count=back_count + 1)
+        msg += "\targs: {track_args}\n\tkwargs: {track_kwargs}\n\twait return"
+        log(..., msg, back_count=back_count + 1, track_args=args, track_kwargs=kwargs)
 
     def log_result(iid: int, result: Any, *, back_count: int = 0):
         nonlocal s_state
 
-        msg = f"calltrack iid-{iid} return: {result}"
+        msg = f"calltrack iid-{iid:04} return: {result}"
         log(..., msg, back_count=back_count + 1)
 
     def shell(*args, **kwargs):
         nonlocal s_state, s_function
 
-        iid = _atomic.value
+        iid = _state.atomic.value
 
         if s_state.track_callee:
             currentframe = inspect.currentframe()
@@ -99,13 +95,13 @@ def callabletrack(
             try:
                 result = s_function(*args, **kwargs)
 
-            except Exception as e:
+            except BaseException as e:
                 # TODO: Improve exception tracking in callabletrack.
                 # When there is an error in the parameter transmission, the exception information does not come from
                 # the original function, but from within callabletrack. I don't know any way to improve this.
                 # But it'sreally not the information I want.
                 exc = traceback.format_exc()
-                log(ERROR_ALIAS, exc, back_count=1)
+                log(ERROR_ALIAS, f"calltrack iid-{iid:04}\n{exc}", back_count=1)
                 raise e
 
         else:

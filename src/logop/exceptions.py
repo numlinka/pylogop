@@ -1,46 +1,32 @@
 # Licensed under the MIT License.
-# logop by numlinka.
-
+# pylogop Copyright (C) 2023 numlinka.
 
 class LogopBaseException (Exception):
     """Logop base exception."""
 
+class LogLevelInvalid (LogopBaseException):
+    """The log level is invalid."""
 
-class LoggingIsClosedError (LogopBaseException):
-    """Logging is closed"""
+class LogLevelNotExists (LogopBaseException):
+    """The log level does not exist."""
 
+class LogLevelAliasInvalid (LogopBaseException):
+    """The log level alias is invalid."""
 
-class LogLevelAliasNotFoundError (LogopBaseException):
-    """The log level alias does not exist"""
+class LogLevelAliasExists (LogopBaseException):
+    """The log level alias already exists."""
 
+class LogLevelAliasNotExists (LogopBaseException):
+    """The log level alias does not exist."""
 
-class LogLevelExceedsThresholdError (LogopBaseException):
-    """The log level exceeds the threshold."""
+class StreamVerificationFailed (LogopBaseException):
+    """The stream verification failed."""
 
+class LoggingIsClosed (LogopBaseException):
+    """The logging object is closed."""
 
-class LogFormatInvalidError (LogopBaseException):
-    """The log format is invalid."""
-
-
-class TooManyStandardTypeLogopObjectError (LogopBaseException):
-    """Too many Logop objects of standard type."""
-
-
-class ExistingLoggingError (LogopBaseException):
-    """Existing logging."""
-
-
-class LogopIdentNotFoundError (LogopBaseException):
-    """The logop ident does not exist."""
+class OutputStreamNotExist (LogopBaseException):
+    """The output stream does not exist."""
 
 
-__all__ = [
-    "LogopBaseException",
-    "LoggingIsClosedError",
-    "LogLevelAliasNotFoundError",
-    "LogLevelExceedsThresholdError",
-    "LogFormatInvalidError",
-    "TooManyStandardTypeLogopObjectError",
-    "ExistingLoggingError",
-    "LogopIdentNotFoundError",
-]
+__all__ = [x for x in dir() if not x.startswith("_")]
