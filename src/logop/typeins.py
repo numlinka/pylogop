@@ -139,35 +139,15 @@ class TrackStateUnit (object):
 
     Provided to the `callabletrack` decorator to record the status information it needs to include.
     """
-    _lock = threading.RLock()
+    _lock: threading.RLock
     logging = ...
 
     track_callee = True
     track_result = True
     track_except = True
 
-
-
-class Atomic (object):
-    """
-    Atomic counter.
-    """
     def __init__(self):
-        self.__lock = threading.RLock()
-        self.__count = 0
-
-    def get_count(self) -> int:
-        with self.__lock:
-            self.__count += 1
-            return self.__count
-
-    @property
-    def count(self) -> int:
-        return self.get_count()
-
-    @property
-    def value(self) -> int:
-        return self.count
+        self._lock = threading.RLock()
 
 
 
@@ -176,6 +156,5 @@ __all__ = [
     "StateSource",
     "LogDetails",
     "LogUnit",
-    "TrackStateUnit",
-    "Atomic"
+    "TrackStateUnit"
 ]

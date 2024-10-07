@@ -1,19 +1,19 @@
 # Licensed under the MIT License.
 # pylogop Copyright (C) 2023 numlinka.
 
+# site
+from typex import Singleton
+
 # internal
 from . import _state
+from . import utils
 from .logging import Logging
 
 
-class _Ease (object):
+class _Ease (Singleton):
     @property
     def logging(self) -> Logging:
-        with _state.lock:
-            if not isinstance(_state._default_logging, Logging):
-                _state._default_logging = Logging()
-
-        return _state._default_logging
+        return utils.get_default_logging()
 
 
 ease = _Ease()

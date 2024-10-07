@@ -8,12 +8,13 @@ sys.path.insert(0, "src")
 
 # lib
 from logop import *
+from logop.constants import *
 
 
 logger = Logging(ALL, stdout=False)
-logger.add_op(LogopStandardPlus())
+logger.add_stream(StandardOutputStreamPlus())
 
-sys.stdout.write("\n")
+logger.stdout.direct("\n")
 logger.trace("This is a trace message.")
 logger.debug("This is a debug message.")
 logger.info("This is an info message.")
@@ -24,9 +25,9 @@ logger.severe("This is a severe message.")
 logger.critical("This is a critical message.")
 logger.fatal("This is a fatal message.")
 
-logger.set_format(FORMAT_DEBUG_EXTEND)
+logger.set_format(FORMAT.DEBUG)
 
-sys.stdout.write("\n")
+logger.stdout.direct("\n")
 logger.trace("This is a trace message.")
 logger.debug("This is a debug message.")
 logger.info("This is an info message.")

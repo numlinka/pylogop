@@ -7,16 +7,19 @@ from setuptools import setup
 
 
 setup(
-    name = "logop",
-    version = "1.2.4",
+    name="logop",
+    version="1.3.0",
     description = "This is a lightweight and scalable Python logging library.",
     long_description = open("README_PyPI.md", "r", encoding="utf-8").read(),
     long_description_content_type = "text/markdown",
-    author = "numlinka",
-    author_email = "numlinka@163.com",
-    url = "https://github.com/numlinka/pylogop",
+    author="numlinka",
+    author_email="numlinka@163.com",
+    url="https://github.com/numlinka/pylogop",
     package_dir={"": "src"},
     packages = ["logop"],
+    install_requires=[
+        "typex>=0.2.1"
+    ],
     classifiers=[
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 3",

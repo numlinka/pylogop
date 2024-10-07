@@ -86,7 +86,7 @@ class StandardOutputStream (BaseOutputStream):
 
         with self._lock:
             if self.logging is not Ellipsis or self.ident != IDENT_EMPTY:
-                raise RuntimeError("This output stream is already associated with a logging object.")
+                raise StreamAssociationFailed("This output stream is already associated with a logging object.")
 
             if ident == IDENT_EMPTY:
                 logging_object.add_stream(self)
@@ -159,6 +159,17 @@ class StandardOutputStreamPlus (StandardOutputStream):
     }
 
     def __init__(self, name: str = ...) -> None:
+        """
+        Create a new standard output stream.
+
+        It accepts the log message unit passed by the logging object and
+        formats it and outputs it to the standard output or error output.
+
+        The difference from the normal version is that the Plus version will color the console log.
+
+        Arguments:
+            name (str): The name of this output stream.
+        """
         super().__init__(name)
         utils.set_windows_console_mode()
 

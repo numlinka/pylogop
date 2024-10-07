@@ -19,6 +19,9 @@ class LogLevelAliasExists (LogopBaseException):
 class LogLevelAliasNotExists (LogopBaseException):
     """The log level alias does not exist."""
 
+class StreamAssociationFailed (LogopBaseException):
+    """The stream association failed."""
+
 class StreamVerificationFailed (LogopBaseException):
     """The stream verification failed."""
 

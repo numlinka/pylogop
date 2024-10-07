@@ -66,30 +66,30 @@ def callabletrack(
         logging = s_state.logging if s_state.logging is not Ellipsis else _ease.ease.logging
         logging.call(level_alias, message, log_mark=mark, back_count=back_count + 1, **kwargs)
 
-    def log_callee(iid: int, caller_frame: FrameType, args: Iterable, kwargs: Mapping, *, back_count: int = 0):
+    def log_callee(lid: int, caller_frame: FrameType, args: Iterable, kwargs: Mapping, *, back_count: int = 0):
         nonlocal s_state, s_function
 
-        msg = f"calltrack iid-{iid:04}\n"
+        msg = f"calltrack lid-{lid:04}\n"
         msg += f"\tcaller: File \"{caller_frame.f_code.co_filename}\", line {caller_frame.f_lineno} in {caller_frame.f_code.co_name}\n"
         msg += f"\tcallee: File \"{s_function.__code__.co_filename}\", line {s_function.__code__.co_firstlineno} in {s_function.__name__}\n"
         msg += "\targs: {track_args}\n\tkwargs: {track_kwargs}\n\twait return"
         log(..., msg, back_count=back_count + 1, track_args=args, track_kwargs=kwargs)
 
-    def log_result(iid: int, result: Any, *, back_count: int = 0):
+    def log_result(lid: int, result: Any, *, back_count: int = 0):
         nonlocal s_state
 
-        msg = f"calltrack iid-{iid:04} return: {result}"
+        msg = f"calltrack lid-{lid:04} return: {result}"
         log(..., msg, back_count=back_count + 1)
 
     def shell(*args, **kwargs):
         nonlocal s_state, s_function
 
-        iid = _state.atomic.value
+        lid = _state.atomic_lid.value
 
         if s_state.track_callee:
             currentframe = inspect.currentframe()
             caller_frame = currentframe.f_back
-            log_callee(iid, caller_frame, args, kwargs, back_count=1)
+            log_callee(lid, caller_frame, args, kwargs, back_count=1)
 
         if s_state.track_except:
             try:
@@ -101,14 +101,14 @@ def callabletrack(
                 # the original function, but from within callabletrack. I don't know any way to improve this.
                 # But it'sreally not the information I want.
                 exc = traceback.format_exc()
-                log(ERROR_ALIAS, f"calltrack iid-{iid:04}\n{exc}", back_count=1)
+                log(ERROR_ALIAS, f"calltrack lid-{lid:04}\n{exc}", back_count=1)
                 raise e
 
         else:
             result = s_function(*args, **kwargs)
 
         if s_state.track_result:
-            log_result(iid, result, back_count=1)
+            log_result(lid, result, back_count=1)
 
         return result
 

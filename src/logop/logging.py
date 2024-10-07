@@ -70,9 +70,7 @@ class Logging (BaseLogging):
             self.__async_thread = threading.Thread(target=self.__async_mainloop, name=thread_name, daemon=daemon)
             self.__async_thread.start()
 
-        with _state.lock:
-            if _state._default_logging is Ellipsis:
-                _state._default_logging = self
+        utils.set_default_logging(self)
 
     @property
     def level(self) -> int:
@@ -241,7 +239,7 @@ class Logging (BaseLogging):
             if stream.type == STANDARD and self.exist_stdout_stream():
                 raise StreamVerificationFailed("Only one standard output stream object can be added.")
 
-            ident = _state.atomic.value
+            ident = _state.atomic_ident.value
             self._unverified_stream_add[ident] = stream
 
         stream.associate(self, ident)

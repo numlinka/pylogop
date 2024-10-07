@@ -23,27 +23,6 @@ __version_info__ = (1, 3, 0)
 __version__ = ".".join(map(str, __version_info__))
 
 
-"""
-## Dependency graph
-
-decorators
- |
-_ease
- |
-logging
- |
-stream
- |
-utils
- |
-_state
- |
-base
- |
-typeins / constants / exceptions
-"""
-
-
 # ! __all__ is not declared for `ease`, so you can't import it via `from _ import *`.
 __all__ = [
     "Logging",

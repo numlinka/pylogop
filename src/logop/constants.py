@@ -92,12 +92,14 @@ IDENT_EMPTY = -1
 
 # name
 DEFAULT_THREAD_NAME = "LoggingThread"
+IDENT_COUNTER = "logop_ident_counter"
+LOG_ID_COUNTER = "logop_log_id_counter"
 
 # others
 CHAR_LF = "\n"
 
 
-class FORMAT (object):
+class FORMAT:
     DEFAULT = "[{date} {time}] [{thread}/{level_name}] {message}"
     SIMPLE = "[{level_name}] {message}"
     VERY_SIMPLE = "[{level_name:.1}] {message}"
