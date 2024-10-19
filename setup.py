@@ -25,6 +25,5 @@ setup(
         "Programming Language :: Python :: 3",
     ],
     license = "MIT",
-    keywords = ["sample", "extensible", "logging"],
-    install_requires = []
+    keywords = ["sample", "extensible", "logging"]
 )
