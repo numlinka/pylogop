@@ -7,8 +7,7 @@ import inspect
 import datetime
 import threading
 import multiprocessing
-
-from typing import Union, Optional, List, Dict, AnyStr
+from typing import Union, Optional, List, Dict, AnyStr, Callable
 
 # internal
 from . import _state
@@ -31,8 +30,8 @@ class Logging (BaseLogging):
         If you don't allow it to automatically initialize a standard output stream,
         then you need to add the output stream yourself, otherwise it won't output anything.
 
-        In synchronous mode, the time consumed by calling the output stream is borne by the calling thread.
-        If you don't want this, please use asynchronous mode.
+        In synchronous mode, the time consumed by calling the output stream is borne by the calling thread,
+        if you don't want this, please use asynchronous mode.
 
         Arguments:
             log_level (str | int): log level; It must be a valid log level or alias; default: INFO.
@@ -120,9 +119,8 @@ class Logging (BaseLogging):
             if isinstance(self.__temp_stdout, StandardOutputStream):
                 return self.__temp_stdout
 
-            else:
-                self.__temp_stdout = StandardOutputStream()
-                return self.__temp_stdout
+            self.__temp_stdout = StandardOutputStream()
+            return self.__temp_stdout
 
     def exist_stdout_stream(self) -> bool:
         """
@@ -170,6 +168,9 @@ class Logging (BaseLogging):
         Arguments:
             log_format (str): log format; It must be a format string.
         """
+        if not isinstance(log_format, str):
+            raise TypeError("The log_format type is not str.")
+
         with self._lock_set:
             self.__format = log_format
 
@@ -382,12 +383,15 @@ class Logging (BaseLogging):
         Arguments:
             log_level (int | str): The level of the log message; It must be a valid log level or alias.
             log_message (str): The message to be logged; It can be a format spec string.
-            *args: The arguments of the format spec string.
-            log_mark (str): The mark of the log message; It will be printed in the log message.
+            *args (AnyStr): The arguments of the format spec string.
+            log_mark (AnyStr): The mark of the log message; It will be printed in the log message.
             back_count (int): The number of frames to go back; It is used to get the source information.
-            **kwargs: The keyword arguments of the format spec string.
+            **kwargs (AnyStr): The keyword arguments of the format spec string.
         """
         self.__close_check()
+
+        if not isinstance(back_count, int) or back_count < 0:
+            back_count = 0
 
         with self._lock_call:
             now = datetime.datetime.now()
@@ -406,130 +410,149 @@ class Logging (BaseLogging):
             details = LogDetails(source, log_message, log_mark)
             unit = LogUnit(details, args, kwargs)
 
-            with self._lock_message:
-                self._list_message.append(unit)
+        with self._lock_message:
+            self._list_message.append(unit)
 
         if self.is_paused:
             return
 
         self.__spark()
 
-    def trace(self, message: str = "", *args, mark: str = ..., back_count: int = 0, **kwargs) -> None:
+    def trace(self, message: str = "", *args: AnyStr, mark: str = ..., back_count: int = 0, **kwargs: AnyStr) -> None:
         """
         Log a TRACE message.
 
         Arguments:
             message (str): The message to be logged; It can be a format spec string.
-            *args: The arguments of the format spec string.
+            *args (AnyStr): The arguments of the format spec string.
             mark (str): The mark of the log message; It will be printed in the log message.
             back_count (int): The number of frames to go back; It is used to get the source information.
-            **kwargs: The keyword arguments of the format spec string.
+            **kwargs (AnyStr): The keyword arguments of the format spec string.
         """
         self.call(TRACE_ALIAS, message, *args, log_mark=mark, back_count=back_count+1, **kwargs)
 
-    def debug(self, message: str = "", *args, mark: str = ..., back_count: int = 0, **kwargs) -> None:
+    def debug(self, message: str = "", *args: AnyStr, mark: str = ..., back_count: int = 0, **kwargs: AnyStr) -> None:
         """
         Log a DEBUG message.
 
         Arguments:
             message (str): The message to be logged; It can be a format spec string.
-            *args: The arguments of the format spec string.
+            *args (AnyStr): The arguments of the format spec string.
             mark (str): The mark of the log message; It will be printed in the log message.
             back_count (int): The number of frames to go back; It is used to get the source information.
-            **kwargs: The keyword arguments of the format spec string.
+            **kwargs (AnyStr): The keyword arguments of the format spec string.
         """
         self.call(DEBUG_ALIAS, message, *args, log_mark=mark, back_count=back_count+1, **kwargs)
 
-    def info(self, message: str = "", *args, mark: str = ..., back_count: int = 0, **kwargs) -> None:
+    def info(self, message: str = "", *args: AnyStr, mark: str = ..., back_count: int = 0, **kwargs: AnyStr) -> None:
         """
         Log a INFO message.
 
         Arguments:
             message (str): The message to be logged; It can be a format spec string.
-            *args: The arguments of the format spec string.
+            *args (AnyStr): The arguments of the format spec string.
             mark (str): The mark of the log message; It will be printed in the log message.
             back_count (int): The number of frames to go back; It is used to get the source information.
-            **kwargs: The keyword arguments of the format spec string.
+            **kwargs (AnyStr): The keyword arguments of the format spec string.
         """
         self.call(INFO_ALIAS, message, *args, log_mark=mark, back_count=back_count+1, **kwargs)
 
-    def warn(self, message: str = "", *args, mark: str = ..., back_count: int = 0, **kwargs) -> None:
+    def warn(self, message: str = "", *args: AnyStr, mark: str = ..., back_count: int = 0, **kwargs: AnyStr) -> None:
         """
         Log a WARN message.
 
         Arguments:
             message (str): The message to be logged; It can be a format spec string.
-            *args: The arguments of the format spec string.
+            *args (AnyStr): The arguments of the format spec string.
             mark (str): The mark of the log message; It will be printed in the log message.
             back_count (int): The number of frames to go back; It is used to get the source information.
-            **kwargs: The keyword arguments of the format spec string.
+            **kwargs (AnyStr): The keyword arguments of the format spec string.
         """
         self.call(WARN_ALIAS, message, *args, log_mark=mark, back_count=back_count+1, **kwargs)
 
-    def warning(self, message: str = "", *args, mark: str = ..., back_count: int = 0, **kwargs) -> None:
+    def warning(self, message: str = "", *args: AnyStr, mark: str = ..., back_count: int = 0, **kwargs: AnyStr) -> None:
         """
         Log a WARNING message.
 
         Arguments:
             message (str): The message to be logged; It can be a format spec string.
-            *args: The arguments of the format spec string.
+            *args (AnyStr): The arguments of the format spec string.
             mark (str): The mark of the log message; It will be printed in the log message.
             back_count (int): The number of frames to go back; It is used to get the source information.
-            **kwargs: The keyword arguments of the format spec string.
+            **kwargs (AnyStr): The keyword arguments of the format spec string.
         """
         self.call(WARNING_ALIAS, message, *args, log_mark=mark, back_count=back_count+1, **kwargs)
 
-    def error(self, message: str = "", *args, mark: str = ..., back_count: int = 0, **kwargs) -> None:
+    def error(self, message: str = "", *args: AnyStr, mark: str = ..., back_count: int = 0, **kwargs: AnyStr) -> None:
         """
         Log a ERROR message.
 
         Arguments:
             message (str): The message to be logged; It can be a format spec string.
-            *args: The arguments of the format spec string.
+            *args (AnyStr): The arguments of the format spec string.
             mark (str): The mark of the log message; It will be printed in the log message.
             back_count (int): The number of frames to go back; It is used to get the source information.
-            **kwargs: The keyword arguments of the format spec string.
+            **kwargs (AnyStr): The keyword arguments of the format spec string.
         """
         self.call(ERROR_ALIAS, message, *args, log_mark=mark, back_count=back_count+1, **kwargs)
 
-    def severe(self, message: str = "", *args, mark: str = ..., back_count: int = 0, **kwargs) -> None:
+    def severe(self, message: str = "", *args: AnyStr, mark: str = ..., back_count: int = 0, **kwargs: AnyStr) -> None:
         """
         Log a SEVERE message.
 
         Arguments:
             message (str): The message to be logged; It can be a format spec string.
-            *args: The arguments of the format spec string.
+            *args (AnyStr): The arguments of the format spec string.
             mark (str): The mark of the log message; It will be printed in the log message.
             back_count (int): The number of frames to go back; It is used to get the source information.
-            **kwargs: The keyword arguments of the format spec string.
+            **kwargs (AnyStr): The keyword arguments of the format spec string.
         """
         self.call(SEVERE_ALIAS, message, *args, log_mark=mark, back_count=back_count+1, **kwargs)
 
-    def critical(self, message: str = "", *args, mark: str = ..., back_count: int = 0, **kwargs) -> None:
+    def critical(self, message: str = "", *args: AnyStr, mark: str = ..., back_count: int = 0, **kwargs: AnyStr) -> None:
         """
         Log a CRITICAL message.
 
         Arguments:
             message (str): The message to be logged; It can be a format spec string.
-            *args: The arguments of the format spec string.
+            *args (AnyStr): The arguments of the format spec string.
             mark (str): The mark of the log message; It will be printed in the log message.
             back_count (int): The number of frames to go back; It is used to get the source information.
-            **kwargs: The keyword arguments of the format spec string.
+            **kwargs (AnyStr): The keyword arguments of the format spec string.
         """
         self.call(CRITICAL_ALIAS, message, *args, log_mark=mark, back_count=back_count+1, **kwargs)
 
-    def fatal(self, message: str = "", *args, mark: str = ..., back_count: int = 0, **kwargs) -> None:
+    def fatal(self, message: str = "", *args: AnyStr, mark: str = ..., back_count: int = 0, **kwargs: AnyStr) -> None:
         """
         Log a FATAL message.
 
         Arguments:
             message (str): The message to be logged; It can be a format spec string.
-            *args: The arguments of the format spec string.
+            *args (AnyStr): The arguments of the format spec string.
             mark (str): The mark of the log message; It will be printed in the log message.
             back_count (int): The number of frames to go back; It is used to get the source information.
-            **kwargs: The keyword arguments of the format spec string.
+            **kwargs (AnyStr): The keyword arguments of the format spec string.
         """
         self.call(FATAL_ALIAS, message, *args, log_mark=mark, back_count=back_count+1, **kwargs)
+
+    def get_custom_call(self, alias: str) -> Callable[[str], None]:
+        """
+        Get a custom log call function.
+
+        Arguments:
+            alias (str): The alias of the custom log level.
+
+        Returns:
+            callable (Callable): The custom log call function.
+        """
+        def call_(message: str = "", *args: AnyStr, mark: str = ..., back_count: int = 0, **kwargs: AnyStr) -> None:
+            nonlocal alias
+            self.call(alias, message, *args, log_mark=mark, back_count=back_count+1, **kwargs)
+
+        return call_
+
+    def __getattr__(self, name: str) -> Callable[[str], None]:
+        return self.get_custom_call(name)
 
 
 

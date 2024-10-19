@@ -104,7 +104,7 @@ class FORMAT:
     SIMPLE = "[{level_name}] {message}"
     VERY_SIMPLE = "[{level_name:.1}] {message}"
     DEBUG = "[{date} {time}.{milli}] [{thread}/{level_name}] {message} ({mark})"
-    TRACE = "[{date} {time}.{milli}{micro}] {file}:{line} [{thread}/{level_name}] {message} ({mark})"
+    TRACE = "[{date} {time}.{milli}{micro}] {file}: {line} [{thread}/{level_name}] {message} ({mark})"
 
 
 

@@ -15,7 +15,7 @@ _This is a lightweight and scalable Python logging library._
   <img src="https://img.shields.io/badge/PyPI-logop-lightblue" alt="PyPI"/>
 </a>
 <a style="text-decoration:none" href="https://www.python.org">
-  <img src="https://img.shields.io/badge/Python-3.7+-lightblue" alt="Python3.7+"/>
+  <img src="https://img.shields.io/badge/Python-3.8+-lightblue" alt="Python3.8+"/>
 </a>
 
 <p></p>

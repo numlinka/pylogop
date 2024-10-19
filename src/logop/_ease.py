@@ -5,7 +5,6 @@
 from typex import Singleton
 
 # internal
-from . import _state
 from . import utils
 from .logging import Logging
 

@@ -160,7 +160,7 @@ def get_default_logging() -> Logging:
     If the default logging object is not set, it will be created and returned.
 
     Returns:
-        Logging (Logging): The default logging object.
+        logging (Logging): The default logging object.
     """
     with _state.lock:
         if not isinstance(_state._default_logging, BaseLogging):
