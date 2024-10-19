@@ -10,7 +10,7 @@ setup(
     name="logop",
     version="1.3.0",
     description = "This is a lightweight and scalable Python logging library.",
-    long_description = open("README_PyPI.md", "r", encoding="utf-8").read(),
+    long_description = open("README.md", "r", encoding="utf-8").read(),
     long_description_content_type = "text/markdown",
     author="numlinka",
     author_email="numlinka@163.com",
@@ -18,7 +18,7 @@ setup(
     package_dir={"": "src"},
     packages = ["logop"],
     install_requires=[
-        "typex>=0.2.1"
+        "typex>=0.3.0"
     ],
     classifiers=[
         "License :: OSI Approved :: MIT License",
