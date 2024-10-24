@@ -55,6 +55,8 @@ class Logging (BaseLogging):
         self.__is_closed = False
         self.__is_async = False
 
+        self.__level: int
+        self.__format: str
         self.__temp_stdout: Optional[StandardOutputStream] = ...
 
         self.set_level(log_level)
@@ -141,6 +143,10 @@ class Logging (BaseLogging):
 
         Arguments:
             level (str | int): log level; It must be a valid log level or alias.
+
+        Raises:
+            TypeError (TypeError): If the level type is not str or int.
+            LogLevelInvalid (LogLevelInvalid): If the level is not a valid log level or alias.
         """
         if isinstance(level, str):
             ld = utils.level_details(level)
@@ -167,6 +173,9 @@ class Logging (BaseLogging):
 
         Arguments:
             log_format (str): log format; It must be a format string.
+
+        Raises:
+            TypeError (TypeError): If the log_format type is not str.
         """
         if not isinstance(log_format, str):
             raise TypeError("The log_format type is not str.")
@@ -201,7 +210,7 @@ class Logging (BaseLogging):
         and the system will wait for unprinted log messages to be output.
 
         Raises:
-            LoggingIsClosed: If the logging object is closed.
+            LoggingIsClosed (LoggingIsClosed): If the logging object is closed.
         """
         self.__close_check()
 
@@ -235,6 +244,9 @@ class Logging (BaseLogging):
 
         Returns:
             ident (int): The identifier of the added stream.
+
+        Raises:
+            StreamVerificationFailed (StreamVerificationFailed): If the stream is not verified.
         """
         with self._lock_stream:
             if stream.type == STANDARD and self.exist_stdout_stream():
@@ -276,6 +288,9 @@ class Logging (BaseLogging):
 
         Arguments:
             ident (int): The identifier of the stream.
+
+        Raises:
+            OutputStreamNotExist (OutputStreamNotExist): If the ident does not exist.
         """
         with self._lock_stream:
             for stream in self._list_stream:
@@ -318,6 +333,9 @@ class Logging (BaseLogging):
         The main purpose is to prevent certain methods from being called after closing.
         In fact, only a few internal methods use it.
         In most cases it is convenient to access `is_closed` directly.
+
+        Raises:
+            LoggingIsClosed (LoggingIsClosed): If the logging object is closed.
         """
         if self.is_closed:
             raise LoggingIsClosed("The logging object is closed.")

@@ -46,6 +46,10 @@ def level_details(level: Union[str, int]) -> LevelDetails:
 
     Returns:
         LevelDetails (LevelDetails): The details of the specified log level.
+
+    Raises:
+        LogLevelAliasNotExists (LogLevelAliasNotExists): If the level parameter is not a valid log level alias.
+        LogLevelNotExists (LogLevelNotExists): If the level parameter is not a valid log level.
     """
     with _state.lock:
         if isinstance(level, str):
@@ -111,6 +115,10 @@ def add_log_level(level: int, alias: str, name: str) -> None:
         level (int): Log level, used to determine the importance of the log and whether it will be filtered.
         alias (str): Alias of the log level, usually a lowercase string, used for indexing, must be unique.
         name (str): The name of the log level, usually an uppercase string, for display purposes.
+
+    Raises:
+        LogLevelInvalid (LogLevelInvalid): If the level parameter is not a valid log level.
+        LogLevelAliasExists (LogLevelAliasExists): If the alias parameter is already in use.
     """
     if not isinstance(level, int) or not ALL <= level <= OFF:
         raise LogLevelInvalid(f"The {level} is not a valid log level.")
@@ -128,6 +136,9 @@ def del_log_level(alias: str) -> None:
 
     Arguments:
         alias (str): Alias of the log level to delete.
+
+    Raises:
+        LogLevelAliasNotExists (LogLevelAliasNotExists): If the alias parameter is not a valid log level alias.
     """
     with _state.lock:
         if alias not in _state.level_map:
@@ -143,6 +154,9 @@ def set_default_logging(logging_object: BaseLogging, force: bool = False) -> Non
     Arguments:
         logging_object (BaseLogging): The logging object to set as default.
         force (bool): Whether to force the setting of the default logging object.
+
+    Raises:
+        TypeError (TypeError): If the logging_object parameter is not an instance of BaseLogging.
     """
     if not isinstance(logging_object, BaseLogging):
         raise TypeError("The logging object must be an instance of BaseLogging.")

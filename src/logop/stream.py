@@ -77,6 +77,11 @@ class StandardOutputStream (BaseOutputStream):
         Arguments:
             logging_object (BaseLogging): The logging object to associate with this output stream.
             ident (int): The ident of this output stream.
+
+        Raises:
+            TypeError (TypeError): The logging_object is not an instance of AbstractLogging.
+            StreamAssociationFailed (StreamAssociationFailed): The output stream is already associated with a logging object.
+            StreamVerificationFailed (StreamAssociationFailed): The ident is not valid.
         """
         if not isinstance(logging_object, BaseLogging):
             raise TypeError("The logging_object must be an instance of AbstractLogging.")
@@ -105,6 +110,9 @@ class StandardOutputStream (BaseOutputStream):
 
         Arguments:
             verify (bool): You don't need to provide this parameter, Cancel the verification phase of the association.
+
+        Raises:
+            StreamVerificationFailed (StreamVerificationFailed): The ident is not valid.
         """
         if not verify:
             self.logging.del_stream(self.ident)
@@ -228,6 +236,9 @@ class FileOutputStream (StandardOutputStream):
             target (str | TextIOBase): It must be a valid file path or a text IO object.
                 If it is a string, it will be formatted with the log unit.
                 default: "./logs/{date}.log"
+
+        Raises:
+            TypeError (TypeError): The target must be a string or a file object.
         """
         if target is Ellipsis:
             return
