@@ -1,10 +1,7 @@
 # pylogop
 
-_Python lightweight logging library_\
-_Python 轻量级日志库_
-
-This is a lightweight and extensible Python logging library.\
-这是一个轻量级且可扩展的 Python 日志库。
+A lightweight Python logging library.\
+一个轻量级的 Python 日志库。
 
 The preferred way to install logop is via pip.\
 安装 logop 的首选方法是通过 pip。
