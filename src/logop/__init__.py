@@ -7,7 +7,7 @@ from . import typeins
 from . import constants
 from . import exceptions
 
-from ._ease import ease
+from ._ease import *
 from .base import BaseLogging, BaseOutputStream
 from .stream import StandardOutputStream, StandardOutputStreamPlus, FileOutputStream
 from .logging import Logging
