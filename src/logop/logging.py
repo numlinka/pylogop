@@ -326,6 +326,37 @@ class Logging (BaseLogging):
             del self._unverified_stream_del[ident]
             return True
 
+    def get_stream(self, ident: int) -> BaseOutputStream:
+        """
+        Get the output stream.
+
+        Arguments:
+            ident (int): The identifier of the stream.
+
+        Returns:
+            stream (BaseOutputStream): output stream.
+
+        Raises:
+            OutputStreamNotExist: If the ident does not exist.
+        """
+        with self._lock_stream:
+            for stream in self._list_stream:
+                if stream.ident == ident:
+                    return stream
+
+            else:
+                raise OutputStreamNotExist(f"The ident {ident} does not exist")
+
+    def get_stream_list(self) -> List[BaseOutputStream]:
+        """
+        Get the list of output streams.
+
+        Returns:
+            stream_list (List[BaseOutputStream]): The list of output streams.
+        """
+        with self._lock_stream:
+            return self._list_stream.copy()
+
     def __close_check(self) -> None:
         """
         Check whether the logging object is closed.
