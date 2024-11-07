@@ -118,7 +118,7 @@ class LogDetails (object):
 
         # ! Frame object cannot be pickle.
         # This will cause asdict to fail, so we need to remove the attribute.
-        # But it cannot be really deleted, so you need to assign this property to Ellipsis.
+        # But it cannot be really deleted, so you need to assign this property to None.
         self.__source = None
 
 

@@ -240,7 +240,7 @@ class FileOutputStream (StandardOutputStream):
         Raises:
             TypeError (TypeError): The target must be a string or a file object.
         """
-        if target is Ellipsis:
+        if target is None:
             return
 
         if not isinstance(target, (str, TextIOBase)):
