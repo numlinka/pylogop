@@ -23,10 +23,10 @@ class StandardOutputStream (BaseOutputStream):
 
     name = STANDARD
     __ident: int = IDENT_EMPTY
-    __logging: BaseLogging = ...
+    __logging: BaseLogging = None
     __exception_count: int = 0
 
-    def __init__(self, name: str = ...):
+    def __init__(self, name: str = None):
         """
         Create a new standard output stream.
 
@@ -90,7 +90,7 @@ class StandardOutputStream (BaseOutputStream):
             raise TypeError("The ident must be an integer.")
 
         with self._lock:
-            if self.logging is not Ellipsis or self.ident != IDENT_EMPTY:
+            if self.logging is not None or self.ident != IDENT_EMPTY:
                 raise StreamAssociationFailed("This output stream is already associated with a logging object.")
 
             if ident == IDENT_EMPTY:
@@ -120,7 +120,7 @@ class StandardOutputStream (BaseOutputStream):
 
         if self.logging.del_stream_verify(self, self.ident):
             with self._lock:
-                self.__logging = ...
+                self.__logging = None
                 self.__ident = IDENT_EMPTY
                 return
 
@@ -166,7 +166,7 @@ class StandardOutputStreamPlus (StandardOutputStream):
         FATAL: "1;37;41"
     }
 
-    def __init__(self, name: str = ...) -> None:
+    def __init__(self, name: str = None) -> None:
         """
         Create a new standard output stream.
 
@@ -203,7 +203,7 @@ class StandardOutputStreamPlus (StandardOutputStream):
 class FileOutputStream (StandardOutputStream):
     __target: Union[str, TextIOBase] = "./logs/{date}.log"
 
-    def __init__(self, name: str = ..., target: Union[str, TextIOBase] = ...) -> None:
+    def __init__(self, name: str = None, target: Union[str, TextIOBase] = None) -> None:
         """
         Create a new file output stream.
 
@@ -251,7 +251,7 @@ class FileOutputStream (StandardOutputStream):
 
     # ! This method is not implemented yet.
     def direct(self, value: str, *args: AnyStr, **kwargs: AnyStr) -> None:
-        ...
+        raise NotImplementedError("This method is not implemented yet.")
         # TODO: Implement this method.
         # This method should not perform any actions until it completes.
         # 2024-10-01 - I haven't figured out how to do this.

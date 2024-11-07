@@ -57,7 +57,7 @@ class Logging (BaseLogging):
 
         self.__level: int
         self.__format: str
-        self.__temp_stdout: Optional[StandardOutputStream] = ...
+        self.__temp_stdout: Optional[StandardOutputStream] = None
 
         self.set_level(log_level)
         self.set_format(log_format)
@@ -425,7 +425,7 @@ class Logging (BaseLogging):
             self.__try_call_stream()
 
     def call(self, log_level: Union[int, str], log_message: str, *args: AnyStr,
-             log_mark: AnyStr = ..., back_count: int = 0, **kwargs: AnyStr) -> None:
+             log_mark: AnyStr = None, back_count: int = 0, **kwargs: AnyStr) -> None:
         """
         New log message.
 
@@ -467,7 +467,7 @@ class Logging (BaseLogging):
 
         self.__spark()
 
-    def trace(self, message: str = "", *args: AnyStr, mark: str = ..., back_count: int = 0, **kwargs: AnyStr) -> None:
+    def trace(self, message: str = "", *args: AnyStr, mark: str = None, back_count: int = 0, **kwargs: AnyStr) -> None:
         """
         Log a TRACE message.
 
@@ -480,7 +480,7 @@ class Logging (BaseLogging):
         """
         self.call(TRACE_ALIAS, message, *args, log_mark=mark, back_count=back_count+1, **kwargs)
 
-    def debug(self, message: str = "", *args: AnyStr, mark: str = ..., back_count: int = 0, **kwargs: AnyStr) -> None:
+    def debug(self, message: str = "", *args: AnyStr, mark: str = None, back_count: int = 0, **kwargs: AnyStr) -> None:
         """
         Log a DEBUG message.
 
@@ -493,7 +493,7 @@ class Logging (BaseLogging):
         """
         self.call(DEBUG_ALIAS, message, *args, log_mark=mark, back_count=back_count+1, **kwargs)
 
-    def info(self, message: str = "", *args: AnyStr, mark: str = ..., back_count: int = 0, **kwargs: AnyStr) -> None:
+    def info(self, message: str = "", *args: AnyStr, mark: str = None, back_count: int = 0, **kwargs: AnyStr) -> None:
         """
         Log a INFO message.
 
@@ -506,7 +506,7 @@ class Logging (BaseLogging):
         """
         self.call(INFO_ALIAS, message, *args, log_mark=mark, back_count=back_count+1, **kwargs)
 
-    def warn(self, message: str = "", *args: AnyStr, mark: str = ..., back_count: int = 0, **kwargs: AnyStr) -> None:
+    def warn(self, message: str = "", *args: AnyStr, mark: str = None, back_count: int = 0, **kwargs: AnyStr) -> None:
         """
         Log a WARN message.
 
@@ -519,7 +519,7 @@ class Logging (BaseLogging):
         """
         self.call(WARN_ALIAS, message, *args, log_mark=mark, back_count=back_count+1, **kwargs)
 
-    def warning(self, message: str = "", *args: AnyStr, mark: str = ..., back_count: int = 0, **kwargs: AnyStr) -> None:
+    def warning(self, message: str = "", *args: AnyStr, mark: str = None, back_count: int = 0, **kwargs: AnyStr) -> None:
         """
         Log a WARNING message.
 
@@ -532,7 +532,7 @@ class Logging (BaseLogging):
         """
         self.call(WARNING_ALIAS, message, *args, log_mark=mark, back_count=back_count+1, **kwargs)
 
-    def error(self, message: str = "", *args: AnyStr, mark: str = ..., back_count: int = 0, **kwargs: AnyStr) -> None:
+    def error(self, message: str = "", *args: AnyStr, mark: str = None, back_count: int = 0, **kwargs: AnyStr) -> None:
         """
         Log a ERROR message.
 
@@ -545,7 +545,7 @@ class Logging (BaseLogging):
         """
         self.call(ERROR_ALIAS, message, *args, log_mark=mark, back_count=back_count+1, **kwargs)
 
-    def severe(self, message: str = "", *args: AnyStr, mark: str = ..., back_count: int = 0, **kwargs: AnyStr) -> None:
+    def severe(self, message: str = "", *args: AnyStr, mark: str = None, back_count: int = 0, **kwargs: AnyStr) -> None:
         """
         Log a SEVERE message.
 
@@ -558,7 +558,7 @@ class Logging (BaseLogging):
         """
         self.call(SEVERE_ALIAS, message, *args, log_mark=mark, back_count=back_count+1, **kwargs)
 
-    def critical(self, message: str = "", *args: AnyStr, mark: str = ..., back_count: int = 0, **kwargs: AnyStr) -> None:
+    def critical(self, message: str = "", *args: AnyStr, mark: str = None, back_count: int = 0, **kwargs: AnyStr) -> None:
         """
         Log a CRITICAL message.
 
@@ -571,7 +571,7 @@ class Logging (BaseLogging):
         """
         self.call(CRITICAL_ALIAS, message, *args, log_mark=mark, back_count=back_count+1, **kwargs)
 
-    def fatal(self, message: str = "", *args: AnyStr, mark: str = ..., back_count: int = 0, **kwargs: AnyStr) -> None:
+    def fatal(self, message: str = "", *args: AnyStr, mark: str = None, back_count: int = 0, **kwargs: AnyStr) -> None:
         """
         Log a FATAL message.
 
@@ -594,7 +594,7 @@ class Logging (BaseLogging):
         Returns:
             callable (Callable): The custom log call function.
         """
-        def call_(message: str = "", *args: AnyStr, mark: str = ..., back_count: int = 0, **kwargs: AnyStr) -> None:
+        def call_(message: str = "", *args: AnyStr, mark: str = None, back_count: int = 0, **kwargs: AnyStr) -> None:
             nonlocal alias
             self.call(alias, message, *args, log_mark=mark, back_count=back_count+1, **kwargs)
 

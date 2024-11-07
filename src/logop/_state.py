@@ -18,7 +18,7 @@ atomic_lid = MultitonAtomic(2**31, instance_name=LOG_ID_COUNTER)
 
 lock = RLock()
 
-_default_logging: Optional[BaseLogging] = ...
+_default_logging: Optional[BaseLogging] = None
 
 level_map = {
     TRACE_ALIAS: LevelDetails(TRACE, TRACE_ALIAS, TRACE_NAME),

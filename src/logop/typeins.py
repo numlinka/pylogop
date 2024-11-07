@@ -54,7 +54,7 @@ class LogDetails (object):
 
     # message
     message: str = ""
-    mark: str = ...
+    mark: str = None
 
     # level
     level: int = field(init=False)
@@ -113,13 +113,13 @@ class LogDetails (object):
         self.process = self.__source.process.pid
 
         # others
-        if self.mark is ...:
+        if self.mark is None:
             self.mark = self.module
 
         # ! Frame object cannot be pickle.
         # This will cause asdict to fail, so we need to remove the attribute.
         # But it cannot be really deleted, so you need to assign this property to Ellipsis.
-        self.__source = ...
+        self.__source = None
 
 
 
