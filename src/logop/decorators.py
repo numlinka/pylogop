@@ -6,7 +6,7 @@ import inspect
 import traceback
 
 from types import FrameType
-from typing import Callable, Union, Iterable, Mapping, Any, Optional
+from typing import Callable, Union, Iterable, Mapping, Any, Optional, AnyStr
 
 # self
 from . import _ease
@@ -18,82 +18,74 @@ from .constants import *
 
 
 def callabletrack(
-        function: Callable = ..., *, callee: bool = ..., result: bool = ...,
-        exception: bool = ..., logging: Optional[BaseLogging] = ..., level: Union[str, int] = ...
-        ):
+        callable_: Callable = None, *, callee: bool = None, result: bool = None,
+        exception: bool = None, logging: Optional[BaseLogging] = None, level: Union[str, int] = None
+        ) -> Callable:
     """
     Decorator for tracking function calls.
 
     Arguments:
-        function (Callable): The function to be decorated.
+        callable (Callable): The function to be decorated.
         callee (bool): Whether to track the caller and callee of the function.
         result (bool): Whether to track the return value of the function.
         exception (bool): Whether to track exceptions raised by the function.
         logging (BaseLogging): The logging instance to use for tracking.
         level (str | int): The level to use for tracking.
+
+    Returns:
+        decorater (Callable): The decorated function or the decorator waiting for the decorated function.
     """
-    s_function = function
-    s_state = TrackStateUnit()
-    if isinstance(callee, bool):
-        s_state.track_callee = callee
+    self = TrackStateUnit()
 
-    if isinstance(result, bool):
-        s_state.track_result = result
+    if callable(callable_):
+        self.callable = callable_
 
-    if isinstance(exception, bool):
-        s_state.track_except = exception
+    if callee is not None:
+        self.track_callee = bool(callee)
+
+    if result is not None:
+        self.track_result = bool(result)
+
+    if exception is not None:
+        self.track_except = bool(exception)
 
     if isinstance(logging, BaseLogging):
-        s_state.logging = logging
+        self.logging = logging
 
-    s_level_alias = TRACE_ALIAS
+    if level is not None:
+        self.level_alias = utils.level_details(level).alias
 
-    def level_correct(reference: Union[str, int] = ...):
-        nonlocal s_level_alias
+    def log(level_alias: str = None, message: str = "", *args: AnyStr, mark: AnyStr = None, back_count: int = 0, **kwargs: AnyStr) -> None:
+        nonlocal self
 
-        if reference is Ellipsis:
-            s_level_alias = TRACE_ALIAS
-            return
+        if level_alias is None:
+            level_alias = self.level_alias
 
-        s_level_alias = utils.level_details(reference).alias
+        logging = self.logging if self.logging is not None else _ease.ease.logging
+        logging.call(level_alias, message, *args, log_mark=mark, back_count=back_count + 1, **kwargs)
 
-    def log(level_alias: str = ..., message: str = "", mark: str = "", *, back_count: int = 0, **kwargs):
-        nonlocal s_state, s_level_alias
-
-        if level_alias is Ellipsis:
-            level_alias = s_level_alias
-
-        logging = s_state.logging if s_state.logging is not Ellipsis else _ease.ease.logging
-        logging.call(level_alias, message, log_mark=mark, back_count=back_count + 1, **kwargs)
-
-    def log_callee(lid: int, caller_frame: FrameType, args: Iterable, kwargs: Mapping, *, back_count: int = 0):
-        nonlocal s_state, s_function
-
-        msg = f"calltrack lid-{lid:04}\n"
-        msg += f"\tcaller: File \"{caller_frame.f_code.co_filename}\", line {caller_frame.f_lineno} in {caller_frame.f_code.co_name}\n"
-        msg += f"\tcallee: File \"{s_function.__code__.co_filename}\", line {s_function.__code__.co_firstlineno} in {s_function.__name__}\n"
-        msg += "\targs: {track_args}\n\tkwargs: {track_kwargs}\n\twait return"
-        log(..., msg, back_count=back_count + 1, track_args=args, track_kwargs=kwargs)
-
-    def log_result(lid: int, result: Any, *, back_count: int = 0):
-        nonlocal s_state
-
-        msg = f"calltrack lid-{lid:04} return: {result}"
-        log(..., msg, back_count=back_count + 1)
-
-    def shell(*args, **kwargs):
-        nonlocal s_state, s_function
+    def shell(*args, **kwargs) -> None:
+        nonlocal self
 
         lid = _state.atomic_lid.value
 
-        if s_state.track_callee:
+        if self.track_callee:
             currentframe = inspect.currentframe()
             caller_frame = currentframe.f_back
-            log_callee(lid, caller_frame, args, kwargs, back_count=1)
+            log(None, CALLABLE_TRACK_CALLEE_FORMAT,
+                lid=lid,
+                caller_filename=caller_frame.f_code.co_filename,
+                caller_lineno=caller_frame.f_lineno,
+                caller_name=caller_frame.f_code.co_name,
+                callee_filename=self.callable.__code__.co_filename,
+                callee_lineno=self.callable.__code__.co_firstlineno,
+                callee_name=self.callable.__name__,
+                track_args=args, track_kwargs=kwargs,
+                back_count=1)
 
-        if s_state.track_except:
+        if self.track_except:
             try:
-                result = s_function(*args, **kwargs)
+                result = self.callable(*args, **kwargs)
 
             except BaseException as e:
                 # TODO: Improve exception tracking in callabletrack.
@@ -101,30 +93,27 @@ def callabletrack(
                 # the original function, but from within callabletrack. I don't know any way to improve this.
                 # But it'sreally not the information I want.
                 exc = traceback.format_exc()
-                log(ERROR_ALIAS, f"calltrack lid-{lid:04}\n{exc}", back_count=1)
+                log(ERROR_ALIAS, CALLABLE_TRACK_EXCEPT_FORMAT, lid=lid, traceback_msg=exc, back_count=1)
                 raise e
 
         else:
-            result = s_function(*args, **kwargs)
+            result = self.callable(*args, **kwargs)
 
-        if s_state.track_result:
-            log_result(lid, result, back_count=1)
+        if self.track_result:
+            log(None, CALLABLE_TRACK_RESULT_FORMAT, lid=lid, result_type=type(result), result_value=result, back_count=1)
 
         return result
 
-    def decorate(function: Callable):
-        nonlocal s_function
+    def decorate(callable_: Callable) -> Callable:
+        nonlocal self
 
-        s_function = function
+        self.callable = callable_
         return shell
 
-    level_correct(level)
-
-    if callable(function):
-        return shell
-
-    else:
+    if callable_ is None:
         return decorate
+
+    return shell
 
 
 __all__ = ["callabletrack"]

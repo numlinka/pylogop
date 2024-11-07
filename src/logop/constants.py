@@ -99,6 +99,18 @@ LOG_ID_COUNTER = "logop_log_id_counter"
 CHAR_LF = "\n"
 
 
+CALLABLE_TRACK_CALLEE_FORMAT = """calltrack lid-{lid:08} call
+\tcaller: File "{caller_filename}", line {caller_lineno} in {caller_name}
+\tcallee: File "{callee_filename}", line {callee_lineno} in {callee_name}
+\targs: {track_args}\n\tkwargs: {track_kwargs}"""
+
+CALLABLE_TRACK_RESULT_FORMAT = """calltrack lid-{lid:08} return
+\t{result_type} {result_value}"""
+
+CALLABLE_TRACK_EXCEPT_FORMAT = """calltrack lid-{lid:08} except
+{traceback_msg}"""
+
+
 class FORMAT:
     DEFAULT = "[{date} {time}] [{thread}/{level_name}] {message}"
     SIMPLE = "[{level_name}] {message}"

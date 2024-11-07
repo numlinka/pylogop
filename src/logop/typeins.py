@@ -6,11 +6,14 @@ import os
 import threading
 
 from types import FrameType
-from typing import Tuple, Dict, AnyStr
+from typing import Tuple, Dict, AnyStr, Callable
 from datetime import datetime as DateTime
 from threading import Thread
 from dataclasses import dataclass, field
 from multiprocessing.process import BaseProcess
+
+# internal
+from .constants import *
 
 
 @dataclass
@@ -140,11 +143,14 @@ class TrackStateUnit (object):
     Provided to the `callabletrack` decorator to record the status information it needs to include.
     """
     _lock: threading.RLock
-    logging = ...
+    logging = None
 
     track_callee = True
     track_result = True
     track_except = True
+
+    callable: Callable = None
+    level_alias: str = TRACE_ALIAS
 
     def __init__(self):
         self._lock = threading.RLock()
