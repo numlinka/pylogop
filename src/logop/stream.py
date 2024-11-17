@@ -7,7 +7,7 @@ import sys
 import threading
 
 from io import TextIOBase
-from typing import AnyStr, Union
+from typing import AnyStr, Union, List
 from dataclasses import asdict
 
 # internal
@@ -165,6 +165,7 @@ class StandardOutputStreamPlus (StandardOutputStream):
         CRITICAL: "1;31",
         FATAL: "1;37;41"
     }
+    _code_sequences: List[int] = []
 
     def __init__(self, name: str = None) -> None:
         """
@@ -179,16 +180,53 @@ class StandardOutputStreamPlus (StandardOutputStream):
             name (str): The name of this output stream.
         """
         super().__init__(name)
+        self._lock = threading.RLock()
         utils.set_windows_console_mode()
+        self._update_code_sequences()
+
+    def _update_code_sequences(self) -> None:
+        with self._lock:
+            self._code_sequences = list(self._color_code_map.keys())
+            self._code_sequences.sort()
 
     def _get_color_code(self, level: int = INFO) -> str:
         code = "0"
-        for strict_level, color_code in self._color_code_map.items():
-            if level >= strict_level:
-                code = color_code
-            else:
-                break
+        with self._lock:
+            for strict_level, color_code in self._color_code_map.items():
+                if level >= strict_level:
+                    code = color_code
+                else:
+                    break
+
         return code
+
+    def set_level_color(self, level: int, *colors: str) -> None:
+        """
+        Set the color of the log level.
+
+        Arguments:
+            level (int): The log level.
+            *colors (str): The color of the log level.
+
+        Raises:
+            LogLevelInvalid (LogLevelInvalid): The level parameter is not a valid log level.
+            ValueError (ValueError): The colors parameter must be provided.
+            TypeError (TypeError): The color parameter must be a string.
+        """
+        if not isinstance(level, int) or not ALL <= level <= OFF:
+            raise LogLevelInvalid(f"The {level} is not a valid log level.")
+
+        if len(colors) == 0:
+            raise ValueError("The colors parameter must be provided.")
+
+        for color in colors:
+            if not isinstance(color, str):
+                raise TypeError("The color must be a string.")
+
+        with self._lock:
+            self._color_code_map[level] = ";".join(colors)
+        self._update_code_sequences()
+
 
     def call(self, log_format: str, log_unit: LogUnit) -> None:
         content = utils.format_log_message(log_format, log_unit)
