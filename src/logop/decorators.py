@@ -72,7 +72,7 @@ def callabletrack(
         if self.track_callee:
             currentframe = inspect.currentframe()
             caller_frame = currentframe.f_back
-            log(None, CALLABLE_TRACK_CALLEE_FORMAT,
+            log(None, SPEC_CALLABLE_TRACK_CALLEE,
                 lid=lid,
                 caller_filename=caller_frame.f_code.co_filename,
                 caller_lineno=caller_frame.f_lineno,
@@ -93,14 +93,14 @@ def callabletrack(
                 # the original function, but from within callabletrack. I don't know any way to improve this.
                 # But it'sreally not the information I want.
                 exc = traceback.format_exc()
-                log(ERROR_ALIAS, CALLABLE_TRACK_EXCEPT_FORMAT, lid=lid, traceback_msg=exc, back_count=1)
+                log(ERROR_ALIAS, SPEC_CALLABLE_TRACK_EXCEPT, lid=lid, traceback_msg=exc, back_count=1)
                 raise e
 
         else:
             result = self.callable(*args, **kwargs)
 
         if self.track_result:
-            log(None, CALLABLE_TRACK_RESULT_FORMAT, lid=lid, result_type=type(result), result_value=result, back_count=1)
+            log(None, SPEC_CALLABLE_TRACK_RESULT, lid=lid, result_type=type(result), result_value=result, back_count=1)
 
         return result
 

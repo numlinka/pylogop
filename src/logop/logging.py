@@ -23,7 +23,7 @@ class Logging (BaseLogging):
     __level: int
     __format: str
 
-    def __init__(self, log_level: Union[str, int] = INFO, log_format: str = FORMAT.DEFAULT, *,
+    def __init__(self, log_level: Union[str, int] = INFO, log_format: str = FORMAT_DEFAULT, *,
                  stdout: bool = True, asynchronous: bool = False, thread_name: str = DEFAULT_THREAD_NAME,
                  daemon: bool = True) -> None:
         """

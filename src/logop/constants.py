@@ -101,26 +101,24 @@ CHAR_LF = "\n"
 # setting
 SECURE_FORMAT_MAXIMUM_NUMBER_OF_CORRECTIONS = 32
 
-# record format
-CALLABLE_TRACK_CALLEE_FORMAT = """calltrack lid-{lid:08} call
+# log format
+FORMAT_DEFAULT = "[{date} {time}] [{thread}/{level_name}] {message}"
+FORMAT_SIMPLE = "[{level_name}] {message}"
+FORMAT_VERY_SIMPLE = "[{level_name:.1}] {message}"
+FORMAT_DEBUG = "[{date} {time}.{milli}] [{thread}/{level_name}] {message} ({mark})"
+FORMAT_TRACE = "[{date} {time}.{milli}{micro}] {file}: {line} [{thread}/{level_name}] {message} ({mark})"
+
+# record format spec
+SPEC_CALLABLE_TRACK_CALLEE = """calltrack lid-{lid:08} call
 \tcaller: File "{caller_filename}", line {caller_lineno} in {caller_name}
 \tcallee: File "{callee_filename}", line {callee_lineno} in {callee_name}
 \targs: {track_args}\n\tkwargs: {track_kwargs}"""
 
-CALLABLE_TRACK_RESULT_FORMAT = """calltrack lid-{lid:08} return
+SPEC_CALLABLE_TRACK_RESULT = """calltrack lid-{lid:08} return
 \t{result_type} {result_value}"""
 
-CALLABLE_TRACK_EXCEPT_FORMAT = """calltrack lid-{lid:08} except
+SPEC_CALLABLE_TRACK_EXCEPT = """calltrack lid-{lid:08} except
 {traceback_msg}"""
-
-# log format
-class FORMAT:
-    DEFAULT = "[{date} {time}] [{thread}/{level_name}] {message}"
-    SIMPLE = "[{level_name}] {message}"
-    VERY_SIMPLE = "[{level_name:.1}] {message}"
-    DEBUG = "[{date} {time}.{milli}] [{thread}/{level_name}] {message} ({mark})"
-    TRACE = "[{date} {time}.{milli}{micro}] {file}: {line} [{thread}/{level_name}] {message} ({mark})"
-
 
 
 __all__ = [x for x in dir() if x[0] != "_"]
