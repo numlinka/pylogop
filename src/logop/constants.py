@@ -98,7 +98,10 @@ LOG_ID_COUNTER = "logop_log_id_counter"
 # others
 CHAR_LF = "\n"
 
+# setting
+SECURE_FORMAT_MAXIMUM_NUMBER_OF_CORRECTIONS = 32
 
+# record format
 CALLABLE_TRACK_CALLEE_FORMAT = """calltrack lid-{lid:08} call
 \tcaller: File "{caller_filename}", line {caller_lineno} in {caller_name}
 \tcallee: File "{callee_filename}", line {callee_lineno} in {callee_name}
@@ -110,7 +113,7 @@ CALLABLE_TRACK_RESULT_FORMAT = """calltrack lid-{lid:08} return
 CALLABLE_TRACK_EXCEPT_FORMAT = """calltrack lid-{lid:08} except
 {traceback_msg}"""
 
-
+# log format
 class FORMAT:
     DEFAULT = "[{date} {time}] [{thread}/{level_name}] {message}"
     SIMPLE = "[{level_name}] {message}"

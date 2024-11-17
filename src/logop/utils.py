@@ -5,7 +5,7 @@
 import sys
 import copy
 
-from typing import Union, Callable, Any
+from typing import Union, Callable, Tuple, Dict, Any, AnyStr
 from dataclasses import asdict
 
 # internal
@@ -90,6 +90,75 @@ def set_windows_console_mode() -> bool:
         return False
 
 
+def secure_format(format_spec: str, *format_args: Tuple[AnyStr], **format_kwargs: Dict[str, AnyStr]) -> str:
+    """
+    Safely formats a string using the specified format arguments and keyword arguments.
+
+    It handles IndexError and KeyError exceptions and tries to add placeholders to the format arguments and keyword arguments.
+
+    Arguments:
+        format_spec (str): The format string to be formatted.
+        *format_args (Tuple[AnyStr]): The tuple of arguments to be used in the format string.
+        **format_kwargs (Dict[str, AnyStr]): The dictionary of keyword arguments to be used in the format string.
+
+    Returns:
+        result (str): The formatted string.
+    """
+    count = 0
+    format_args = list(format_args)
+
+    while True:
+        try:
+            if count > SECURE_FORMAT_MAXIMUM_NUMBER_OF_CORRECTIONS: raise ValueError
+            result = format_spec.format(*format_args, **format_kwargs)
+
+        except IndexError as _:
+            format_args.append("{}")
+            count += 1
+            continue
+
+        except KeyError as e:
+            key = str(e)[1:-1]
+            format_kwargs[key] = f"{{{key}}}"
+            count += 1
+            continue
+
+        except Exception as _:
+            for key, value in format_kwargs.items():
+                format_spec = format_spec.replace(f"{{{key}}}", value)
+
+            else:
+                return format_spec
+
+        else:
+            return result
+
+
+def format_log_message_secure(log_format: str, log_unit: LogUnit) -> str:
+    """
+    Formats a log message using the specified format string and log unit.
+
+    However, compared to the standard format function, it guarantees that there will be output, but with some loss of detail.
+
+    Recommended only if the standard formatting process reports an error.
+
+    Arguments:
+        log_format (str): The format string for the log message.
+        log_unit (LogUnit): The log unit containing the log information.
+
+    Returns:
+        message (str): The formatted log message.
+    """
+    try:
+        format_kwargs = asdict(log_unit.details)
+        content = secure_format(log_format, **format_kwargs)
+        format_kwargs.update(log_unit.kwargs)
+        return secure_format(content, *log_unit.args, **format_kwargs)
+
+    except Exception as _:
+        return log_format
+
+
 def format_log_message(log_format: str, log_unit: LogUnit) -> str:
     """
     Formats a log message using the specified format string and log unit.
@@ -101,10 +170,14 @@ def format_log_message(log_format: str, log_unit: LogUnit) -> str:
     Returns:
         message (str): The formatted log message.
     """
-    format_spec = asdict(log_unit.details)
-    content = log_format.format(**format_spec)
-    format_spec.update(log_unit.kwargs)
-    return content.format(**format_spec)
+    try:
+        format_kwargs = asdict(log_unit.details)
+        content = log_format.format(**format_kwargs)
+        format_kwargs.update(log_unit.kwargs)
+        return content.format(*log_unit.args, **format_kwargs)
+
+    except Exception as _:
+        return format_log_message_secure(log_format, log_unit)
 
 
 def add_log_level(level: int, alias: str, name: str) -> None:
