@@ -15,7 +15,7 @@ logger = Logging(ALL, stdout=False)
 logger.add_stream(StandardOutputStreamPlus())
 
 
-@callabletrack(exception=True)
+@callabletrack
 def demo_function(a: int, b: int) -> float:
     return a / b
 

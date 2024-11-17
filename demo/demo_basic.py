@@ -25,7 +25,7 @@ logger.severe("This is a severe message.")
 logger.critical("This is a critical message.")
 logger.fatal("This is a fatal message.")
 
-logger.set_format(FORMAT.TRACE)
+logger.set_format(FORMAT_TRACE)
 
 logger.stdout.direct("\n")
 logger.trace("This is a trace message.")
