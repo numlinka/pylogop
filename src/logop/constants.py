@@ -108,6 +108,58 @@ FORMAT_VERY_SIMPLE = "[{level_name:.1}] {message}"
 FORMAT_DEBUG = "[{date} {time}.{milli}] [{thread}/{level_name}] {message} ({mark})"
 FORMAT_TRACE = "[{date} {time}.{milli}{micro}] {file}: {line} [{thread}/{level_name}] {message} ({mark})"
 
+# ANSI Codes
+RESET = "0"
+BOLD = "1"
+DIM = "2"
+ITALIC = "3"
+UNDERLINE = "4"
+BLINK = "5"
+REVERSE = "7"
+HIDDEN = "8"
+STRIKETHROUGH = "9"
+FG_BLACK = "30"
+FG_RED = "31"
+FG_GREEN = "32"
+FG_YELLOW = "33"
+FG_BLUE = "34"
+FG_MAGENTA = "35"
+FG_CYAN = "36"
+FG_WHITE = "37"
+BG_BLACK = "40"
+BG_RED = "41"
+BG_GREEN = "42"
+BG_YELLOW = "43"
+BG_BLUE = "44"
+BG_MAGENTA = "45"
+BG_CYAN = "46"
+BG_WHITE = "47"
+
+FG_256 = "38;5;{n}"
+BG_256 = "48;5;{n}"
+FG_RGB = "38;2;{r};{g};{b}"
+BG_RGB = "48;2;{r};{g};{b}"
+
+CLEAR_SCREEN = "\033[2J"
+CLEAR_FROM_CURSOR_TO_START = "\033[1J"
+CLEAR_FROM_CURSOR_TO_END = "\033[0J"
+
+CLEAR_LINE = "\033[K"
+CLEAR_LINE_FROM_CURSOR_TO_START = "\033[1K"
+CLEAR_LINE_FROM_CURSOR_TO_END = "\033[2K"
+
+CURSOR_UP = "\033[{n}A"
+CURSOR_DOWN = "\033[{n}B"
+CURSOR_FORWARD = "\033[{n}C"
+CURSOR_BACK = "\033[{n}D"
+CURSOR_POSITION = "\033[{row};{col}H"
+CURSOR_COLUMN = "\033[{col}G"
+
+CURSOR_SAVE = "\033[s"
+CURSOR_RESTORE = "\033[u"
+CURSOR_HIDE = "\033[?25l"
+CURSOR_SHOW = "\033[?25h"
+
 # record format spec
 SPEC_CALLABLE_TRACK_CALLEE = """calltrack lid-{lid:08} call
 \tcaller: File "{caller_filename}", line {caller_lineno} in {caller_name}
