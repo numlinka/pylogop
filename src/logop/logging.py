@@ -246,11 +246,12 @@ class Logging (BaseLogging):
             ident (int): The identifier of the added stream.
 
         Raises:
+            StandardOutputStreamExist (StandardOutputStreamExist): If the standard output stream already exists.
             StreamVerificationFailed (StreamVerificationFailed): If the stream is not verified.
         """
         with self._lock_stream:
             if stream.type == STANDARD and self.exist_stdout_stream():
-                raise StreamVerificationFailed("Only one standard output stream object can be added.")
+                raise StandardOutputStreamExist("Only one standard output stream object can be added.")
 
             ident = _state.atomic_ident.value
             self._unverified_stream_add[ident] = stream
@@ -584,7 +585,7 @@ class Logging (BaseLogging):
         """
         self.call(FATAL_ALIAS, message, *args, log_mark=mark, back_count=back_count+1, **kwargs)
 
-    def get_custom_call(self, alias: str) -> Callable[[str], None]:
+    def get_custom_call(self, alias: str) -> Callable[..., None]:
         """
         Get a custom log call function.
 

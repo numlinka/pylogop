@@ -7,7 +7,7 @@ import sys
 import threading
 
 from io import TextIOBase
-from typing import AnyStr, Union, List
+from typing import AnyStr, Union, List, Optional
 from dataclasses import asdict
 
 # internal
@@ -23,7 +23,7 @@ class StandardOutputStream (BaseOutputStream):
 
     name = STANDARD
     __ident: int = IDENT_EMPTY
-    __logging: BaseLogging = None
+    __logging: Optional[BaseLogging] = None
     __exception_count: int = 0
 
     def __init__(self, name: str = None):
@@ -52,7 +52,7 @@ class StandardOutputStream (BaseOutputStream):
             return self.__ident
 
     @property
-    def logging(self) -> BaseLogging:
+    def logging(self) -> Optional[BaseLogging]:
         """The logging object associated with this output stream | **Read only**"""
         with self._lock:
             return self.__logging
@@ -79,12 +79,12 @@ class StandardOutputStream (BaseOutputStream):
             ident (int): The ident of this output stream.
 
         Raises:
-            TypeError (TypeError): The logging_object is not an instance of AbstractLogging.
+            TypeError (TypeError): The logging_object is not an instance of BaseLogging.
             StreamAssociationFailed (StreamAssociationFailed): The output stream is already associated with a logging object.
             StreamVerificationFailed (StreamAssociationFailed): The ident is not valid.
         """
         if not isinstance(logging_object, BaseLogging):
-            raise TypeError("The logging_object must be an instance of AbstractLogging.")
+            raise TypeError("The logging_object must be an instance of BaseLogging.")
 
         if not isinstance(ident, int):
             raise TypeError("The ident must be an integer.")

@@ -25,6 +25,9 @@ class StreamAssociationFailed (LogopBaseException):
 class StreamVerificationFailed (LogopBaseException):
     """The stream verification failed."""
 
+class StandardOutputStreamExist (LogopBaseException):
+    """The standard output stream already exists."""
+
 class LoggingIsClosed (LogopBaseException):
     """The logging object is closed."""
 
