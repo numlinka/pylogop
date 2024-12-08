@@ -52,8 +52,7 @@ class LogDetails (object):
     # source
     __source: StateSource = field(repr=False)
 
-    # message
-    message: str = ""
+    # mark
     mark: str = None
 
     # level
@@ -131,6 +130,7 @@ class LogUnit (object):
     In addition to the log unit details, it also contains other formatted content passed by the user.
     """
     details: LogDetails
+    message: AnyStr
     args: Tuple[AnyStr]
     kwargs: Dict[str, AnyStr]
 

@@ -100,16 +100,13 @@ def secure_format(format_spec: str, *format_args: Tuple[AnyStr], **format_kwargs
         format_spec (str): The format string to be formatted.
         *format_args (Tuple[AnyStr]): The tuple of arguments to be used in the format string.
         **format_kwargs (Dict[str, AnyStr]): The dictionary of keyword arguments to be used in the format string.
-
-    Returns:
-        result (str): The formatted string.
     """
     count = 0
     format_args = list(format_args)
 
     while True:
         try:
-            if count > SECURE_FORMAT_MAXIMUM_NUMBER_OF_CORRECTIONS: raise ValueError
+            if count > SECURE_FORMAT_MAXIMUM_NUMBER_OF_CORRECTIONS: return format_spec
             result = format_spec.format(*format_args, **format_kwargs)
 
         except IndexError as _:
@@ -124,39 +121,10 @@ def secure_format(format_spec: str, *format_args: Tuple[AnyStr], **format_kwargs
             continue
 
         except Exception as _:
-            for key, value in format_kwargs.items():
-                format_spec = format_spec.replace(f"{{{key}}}", value)
-
-            else:
-                return format_spec
+            return format_spec
 
         else:
             return result
-
-
-def format_log_message_secure(log_format: str, log_unit: LogUnit) -> str:
-    """
-    Formats a log message using the specified format string and log unit.
-
-    However, compared to the standard format function, it guarantees that there will be output, but with some loss of detail.
-
-    Recommended only if the standard formatting process reports an error.
-
-    Arguments:
-        log_format (str): The format string for the log message.
-        log_unit (LogUnit): The log unit containing the log information.
-
-    Returns:
-        message (str): The formatted log message.
-    """
-    try:
-        format_kwargs = asdict(log_unit.details)
-        content = secure_format(log_format, **format_kwargs)
-        format_kwargs.update(log_unit.kwargs)
-        return secure_format(content, *log_unit.args, **format_kwargs)
-
-    except Exception as _:
-        return log_format
 
 
 def format_log_message(log_format: str, log_unit: LogUnit) -> str:
@@ -172,13 +140,31 @@ def format_log_message(log_format: str, log_unit: LogUnit) -> str:
     """
     try:
         format_kwargs = asdict(log_unit.details)
-        content = log_format.format(**format_kwargs)
-        format_kwargs.update(log_unit.kwargs)
-        return content.format(*log_unit.args, **format_kwargs)
+        if isinstance(log_unit.message, str):
+            if not log_unit.args and not log_unit.kwargs:
+                format_kwargs[MESSAGE] = log_unit.message
+
+            else:
+                msg_kwargs = copy.copy(format_kwargs)
+                msg_kwargs.update(log_unit.kwargs)
+                format_kwargs[MESSAGE] = secure_format(log_unit.message, *log_unit.args, **msg_kwargs)
+
+        else:
+            format_kwargs[MESSAGE] = log_unit.message
+
+    except Exception:
+        format_kwargs[MESSAGE] = log_unit.message
+
+    try:
+        return log_format.format(**format_kwargs)
 
     except Exception as _:
-        return format_log_message_secure(log_format, log_unit)
+        result = secure_format(log_format, **format_kwargs)
+        if result != log_format:
+            return result
 
+        return f"Log message: {format_kwargs[MESSAGE]}\n--> {log_format} <-- is not a valid format specifier."
+        
 
 def add_log_level(level: int, alias: str, name: str) -> None:
     """

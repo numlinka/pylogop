@@ -180,6 +180,9 @@ class Logging (BaseLogging):
         if not isinstance(log_format, str):
             raise TypeError("The log_format type is not str.")
 
+        if f"{{{MESSAGE}}}" not in log_format:
+            raise ValueError("The log_format does not contain the message placeholder.")
+
         with self._lock_set:
             self.__format = log_format
 
@@ -457,8 +460,8 @@ class Logging (BaseLogging):
                 multiprocessing.current_process()
             )
 
-            details = LogDetails(source, log_message, log_mark)
-            unit = LogUnit(details, args, kwargs)
+            details = LogDetails(source, log_mark)
+            unit = LogUnit(details, log_message, args, kwargs)
 
         with self._lock_message:
             self._list_message.append(unit)
