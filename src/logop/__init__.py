@@ -19,7 +19,7 @@ __author__ = "numlinka"
 __license__ = "LGPL 3.0"
 __copyright__ = "Copyright (C) 2023 numlinka"
 
-__version_info__ = (1, 3, 5)
+__version_info__ = (1, 3, 6)
 __version__ = ".".join(map(str, __version_info__))
 
 
