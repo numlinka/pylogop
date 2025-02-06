@@ -56,12 +56,12 @@ def level_details(level: Union[str, int]) -> LevelDetails:
             if level not in _state.level_map:
                 raise LogLevelAliasNotExists(level)
 
-            return copy.copy(_state.level_map[level])
+            return _state.level_map[level]
 
         elif isinstance(level, int):
             for _, details in _state.level_map.items():
                 if details.level == level:
-                    return copy.copy(details)
+                    return details
 
             else:
                 raise LogLevelNotExists(level)

@@ -16,7 +16,7 @@ from multiprocessing.process import BaseProcess
 from .constants import *
 
 
-@dataclass
+@dataclass(frozen=True)
 class LevelDetails (object):
     """
     Log level details.
