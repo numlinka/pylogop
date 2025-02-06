@@ -11,8 +11,8 @@ from logop import *
 from logop.constants import *
 
 
-logger = Logging(ALL, stdout=False)
-logger.add_stream(StandardOutputStreamPlus())
+log = Logging(ALL, stdout=False)
+log.add_stream(StandardOutputStreamPlus())
 
 
 @callabletrack
@@ -21,13 +21,13 @@ def demo_function(a: int, b: int) -> float:
 
 
 def main():
-    logger.stdout.direct("\n")
-    logger.info("Let us first call the function in the right way.")
+    log.stdout.direct("\n")
+    log.info("Let us first call the function in the right way.")
     demo_function(1, 1)
 
     try:
-        logger.stdout.direct("\n")
-        logger.info("Now let us call the function in the wrong way.")
+        log.stdout.direct("\n")
+        log.info("Now let us call the function in the wrong way.")
         demo_function(1, 0)
 
     except ZeroDivisionError as _:
