@@ -5,8 +5,7 @@
 import inspect
 import traceback
 
-from types import FrameType
-from typing import Callable, Union, Iterable, Mapping, Any, Optional, AnyStr
+from typing import Callable, Union, Optional, AnyStr
 
 # self
 from . import _ease

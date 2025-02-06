@@ -10,10 +10,6 @@ from .typeins import LogUnit
 from .constants import *
 
 
-class BaseLogging: ...
-class BaseOutputStream: ...
-
-
 class BaseLogging (ABC):
     """
     The logging object.
@@ -26,7 +22,7 @@ class BaseLogging (ABC):
     is_paused: bool
     is_closed: bool
     is_async: bool
-    stdout: BaseOutputStream
+    stdout: "BaseOutputStream"
 
     @abstractmethod
     def set_level(self, level: Union[str, int]) -> None: ...
@@ -44,16 +40,16 @@ class BaseLogging (ABC):
     def close(self) -> None: ...
 
     @abstractmethod
-    def add_stream(self, stream: BaseOutputStream) -> int: ...
+    def add_stream(self, stream: "BaseOutputStream") -> int: ...
 
     @abstractmethod
-    def add_stream_verify(self, stream: BaseOutputStream, ident: int) -> bool: ...
+    def add_stream_verify(self, stream: "BaseOutputStream", ident: int) -> bool: ...
 
     @abstractmethod
     def del_stream(self, ident: int) -> None: ...
 
     @abstractmethod
-    def del_stream_verify(self, stream: BaseOutputStream, ident: int) -> bool: ...
+    def del_stream_verify(self, stream: "BaseOutputStream", ident: int) -> bool: ...
 
     @abstractmethod
     def call(self, log_level: Union[int, str], log_message: str, *args: AnyStr, log_mark: AnyStr = ..., back_count: int = 0, **kwargs: AnyStr) -> None: ...
